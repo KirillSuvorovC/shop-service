@@ -1,0 +1,49 @@
+package org.web.shop_service.user;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.web.shop_service.role.Role;
+import org.web.shop_service.role.RoleService;
+
+import java.util.List;
+import java.util.Optional;
+
+@RequiredArgsConstructor
+@Service
+public class UserService implements UserDetailsService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
+    @Override
+    @Transactional
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        final var user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new UsernameNotFoundException(
+                                "user with username %s not found".formatted(username)));
+        final var authorities = List.of(new SimpleGrantedAuthority(user.getRole().getName()));
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(), user.getPassword(), authorities);
+    }
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public UserDetails createUser(UserRegisterRequest request) {
+
+        final var newUser = new User();
+        newUser.setUsername(request.username());
+        newUser.setPassword(passwordEncoder.encode(request.password()));
+        newUser.setRole(roleService.getRoleByName(Role.ROLE_USER));
+        userRepository.save(newUser);
+        final var authorities = List.of(new SimpleGrantedAuthority(newUser.getRole().getName()));
+        return new org.springframework.security.core.userdetails.User(
+                newUser.getUsername(), newUser.getPassword(), authorities);
+    }
+}
