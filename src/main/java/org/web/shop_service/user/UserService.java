@@ -21,7 +21,6 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
     @Override
-    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         final var user = userRepository.findByUsername(username)
                         .orElseThrow(() -> new UsernameNotFoundException(
@@ -36,7 +35,6 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails createUser(UserRegisterRequest request) {
-
         final var newUser = new User();
         newUser.setUsername(request.username());
         newUser.setPassword(passwordEncoder.encode(request.password()));
