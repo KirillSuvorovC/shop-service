@@ -2,7 +2,6 @@ package org.web.shop_service.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -56,10 +55,10 @@ public class JwtUtils {
 
     private Claims getAllClaimsToken(String token) {
         return Jwts.parser()
-                .verifyWith(secretKey)
+                .verifyWith(getSecret())
                 .build()
                 .parseSignedClaims(token)
-                .getBody();
+                .getPayload();
     }
 
     private SecretKey getSecret() {
