@@ -1,4 +1,4 @@
-package org.web.shop_service.configs;
+package org.web.shop_service.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

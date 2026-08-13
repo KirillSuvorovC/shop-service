@@ -1,4 +1,4 @@
-package org.web.shop_service.configs;
+package org.web.shop_service.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +16,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.web.shop_service.security.UnauthorizedEntryPoint;
 import org.web.shop_service.user.UserService;
 
 @EnableWebSecurity

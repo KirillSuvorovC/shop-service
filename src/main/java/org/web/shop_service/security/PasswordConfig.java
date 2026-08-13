@@ -1,4 +1,4 @@
-package org.web.shop_service.configs;
+package org.web.shop_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
