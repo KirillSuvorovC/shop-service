@@ -23,4 +23,15 @@ public class ResponseError {
     public static ResponseEntity<ResponseError> asEntity(HttpStatus status, String message) {
         return ResponseEntity.status(status).body(new ResponseError(status, message));
     }
+
+    public static String asJson(HttpStatus status, String message) {
+        final var now = LocalDateTime.now();
+        return """
+                {
+                    "status": %d,
+                    "message": "%s",
+                    "timestamp": "%s"
+                }
+               """.formatted(status.value(), message, now.toString());
+    }
 }
