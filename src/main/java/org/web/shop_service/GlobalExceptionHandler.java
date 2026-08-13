@@ -1,5 +1,6 @@
 package org.web.shop_service;
 
+import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +25,11 @@ public class GlobalExceptionHandler {
                             .map(FieldError::getDefaultMessage)
                             .collect(Collectors.joining(", ", "", "."));
         return ResponseError.asEntity(HttpStatus.BAD_REQUEST, errors);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ResponseError> handle(ValidationException e) {
+        return ResponseError.asEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
