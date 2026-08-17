@@ -23,27 +23,17 @@ public class GlobalExceptionHandler {
                             .getFieldErrors()
                             .stream()
                             .map(FieldError::getDefaultMessage)
-                            .collect(Collectors.joining(", ", "", "."));
+                            .collect(Collectors.joining(", "));
         return ResponseError.asEntity(HttpStatus.BAD_REQUEST, errors);
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ResponseError> handle(ValidationException e) {
+    @ExceptionHandler({ValidationException.class, InvalidRequestException.class})
+    public ResponseEntity<ResponseError> handleBadRequest(Exception e) {
         return ResponseError.asEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ResponseError> handle(EntityNotFoundException e) {
-        return ResponseError.asEntity(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-
-    @ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<ResponseError> handle(InvalidRequestException e) {
-        return ResponseError.asEntity(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ResponseError> handle(UsernameNotFoundException e) {
-        return ResponseError.asEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+    @ExceptionHandler({EntityNotFoundException.class, UsernameNotFoundException.class})
+    public ResponseEntity<ResponseError> handleNotFound(Exception e) {
+        return ResponseError.asEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 }

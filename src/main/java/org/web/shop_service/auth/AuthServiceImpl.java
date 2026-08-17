@@ -1,8 +1,10 @@
 package org.web.shop_service.auth;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.web.shop_service.user.User;
@@ -22,7 +24,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JwtResponse createAuthToken(JwtRequest request) {
-        authenticationManager.authenticate(newAuthenticationToken(request));
+        try {
+            authenticationManager.authenticate(newAuthenticationToken(request));
+        } catch (BadCredentialsException e) {
+            throw new ValidationException("invalid login or password");
+        }
         final var userDetails = userService.loadUserByUsername(request.username());
         final String token = jwtUtils.generateToken(userDetails);
         return new JwtResponse(token);
