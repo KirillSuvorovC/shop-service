@@ -53,6 +53,8 @@ public class JwtUtils {
         return getAllClaimsToken(token).get("roles", List.class);
     }
 
+    public long getJwtLifetimeOfSeconds() { return jwtLifetime.getSeconds(); }
+
     private Claims getAllClaimsToken(String token) {
         return Jwts.parser()
                 .verifyWith(getSecret())
