@@ -11,11 +11,15 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.web.shop_service.annotations.PublicEndPoint;
 import org.web.shop_service.user.UserService;
 
 @EnableWebSecurity
@@ -23,6 +27,7 @@ import org.web.shop_service.user.UserService;
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
+    private final RequestMappingHandlerMapping mapping;
     private final UserService service;
 
     @Bean
@@ -30,16 +35,21 @@ public class SecurityConfig {
                         DaoAuthenticationProvider provider,
                         JwtAuthenticationFilter jwtFilter,
                         UnauthorizedEntryPoint unauthorizedEntryPoint) throws Exception {
+        final String[] publicEndPoints = getPublicEndPoints();
         return http
-                .csrf(CsrfConfigurer::disable)
-                .authorizeHttpRequests(registry ->
-                        registry.requestMatchers("/**").permitAll())
-                .sessionManagement(configurer ->
-                        configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(configurer ->
-                        configurer.authenticationEntryPoint(unauthorizedEntryPoint))
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers(publicEndPoints)
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(handling ->
+                        handling.authenticationEntryPoint(unauthorizedEntryPoint))
                 .authenticationProvider(provider)
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, CsrfFilter.class)
+                .addFilterAfter(new CsrfCookieFilter(), ExceptionTranslationFilter.class)
                 .build();
     }
 
@@ -60,5 +70,14 @@ public class SecurityConfig {
     @Bean
     public RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.fromHierarchy("ROLE_ADMIN > ROLE_USER");
+    }
+
+    private String[] getPublicEndPoints() {
+        return mapping.getHandlerMethods().entrySet()
+                .stream()
+                .filter(e -> e.getValue().hasMethodAnnotation(PublicEndPoint.class))
+                .flatMap(e -> e.getKey().getDirectPaths().stream())
+                .toList()
+                .toArray(new String[0]);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.web.shop_service.annotations.PublicEndPoint;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.utils.JwtUtils;
 
@@ -20,6 +21,7 @@ public class AuthController {
     private final JwtUtils jwtUtils;
 
     @PostMapping("/login")
+    @PublicEndPoint
     public ResponseEntity<JwtResponse> createAuthToken(@Valid @RequestBody
                                                            JwtRequest request,
                                                        HttpServletResponse response) {
@@ -29,6 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @PublicEndPoint
     public ResponseEntity<JwtResponse> registerUser(@Valid @RequestBody
                                                         UserRegisterRequest request,
                                                     HttpServletResponse response) {
