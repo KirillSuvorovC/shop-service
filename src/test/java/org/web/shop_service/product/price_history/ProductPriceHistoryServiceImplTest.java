@@ -5,14 +5,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.web.shop_service.product.Product;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.web.shop_service.product.TestProductFactory;
 
-import java.math.BigDecimal;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,21 +26,16 @@ public class ProductPriceHistoryServiceImplTest {
     @Test
     void saveChange_shouldReturnDto() {
         // Given
-        final var product = new Product();
-        product.setId(1L);
-        product.setName("Product");
-        product.setCreatedAt(ZonedDateTime.now(ZoneOffset.UTC));
-        product.setPrice(new BigDecimal("50.00"));
-
+        final var product = TestProductFactory.createProduct(1L);
         final var history = new ProductPriceHistory();
         history.setId(1L);
         history.setProduct(product);
         ZonedDateTime updated = ZonedDateTime.now(ZoneOffset.UTC).minusDays(5);
         history.setUpdatedAt(updated);
-        history.setPrice(new BigDecimal("50.00"));
+        history.setPrice(product.getPrice());
         when(repository.save(any(ProductPriceHistory.class))).thenReturn(history);
         // Action
-        final ProductPriceHistoryResponse response = service.saveChange(product);
+        final ProductPriceHistoryDTO response = service.saveChange(product);
         // Check
         assertNotNull(response);
         assertEquals(history.getId(), response.id());
@@ -46,5 +43,48 @@ public class ProductPriceHistoryServiceImplTest {
         assertEquals(history.getPrice(), response.price());
         assertEquals(history.getUpdatedAt(), response.updatedAt());
         verify(repository, times(1)).save(any());
+    }
+
+    @Test
+    void getPriceChanges_shouldReturnDto() {
+        // Given
+        final var product = TestProductFactory.createProduct(1L);
+        final var histories = List.of(
+                    TestProductFactory.createProductHistory(1L, product),
+                    TestProductFactory.createProductHistory(2L, product),
+                    TestProductFactory.createProductHistory(3L, product));
+        final var pageable = PageRequest.of(0, 20);
+        when(repository.findAll(pageable)).thenReturn(new PageImpl<>(histories));
+        // Action
+        final ProductsPriceHistoryDTO dto = service.getPriceChanges(pageable);
+        final int count = dto.getCount();
+        // Check
+        assertNotNull(dto);
+        assertEquals(histories.size(), count);
+        verify(repository, times(1)).findAll(pageable);
+        for (int i = 0; i < count; i ++) {
+            final var entity = histories.get(i);
+            final var response = dto.getHistories().get(i);
+            assertEquals(entity.getId(), response.id());
+            assertEquals(entity.getProduct().getId(), response.productId());
+            assertEquals(entity.getPrice(), response.price());
+            assertEquals(entity.getUpdatedAt(), response.updatedAt());
+        }
+    }
+
+    @Test
+    void getPriceChanges_shouldReturnEmptyDto() {
+        // Given
+        final var histories = new ArrayList<ProductPriceHistory>();
+        final var pageable = PageRequest.of(0, 20);
+        when(repository.findAll(pageable)).thenReturn(new PageImpl<>(histories));
+        // Action
+        final ProductsPriceHistoryDTO dto = service.getPriceChanges(pageable);
+        final int count = dto.getCount();
+        // Check
+        assertNotNull(dto);
+        assertEquals(0, dto.getCount());
+        assertTrue(dto.getHistories().isEmpty());
+        verify(repository, times(1)).findAll(pageable);
     }
 }

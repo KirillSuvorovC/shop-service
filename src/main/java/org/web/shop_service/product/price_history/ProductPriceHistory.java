@@ -11,8 +11,12 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Entity
+@NamedEntityGraph(name = ProductPriceHistory.GRAPH_WITH_PRODUCT,
+    attributeNodes = @NamedAttributeNode("product")
+)
 @Table(name = "products_price_history")
 public class ProductPriceHistory {
+    public static final String GRAPH_WITH_PRODUCT = "ProductPriceHistory.withProduct";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "history_id")

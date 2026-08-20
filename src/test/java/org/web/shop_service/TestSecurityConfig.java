@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.web.shop_service.utils.JwtUtils;
 
 @TestConfiguration
 public class TestSecurityConfig {
@@ -14,4 +15,7 @@ public class TestSecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .build();
     }
+
+    @Bean
+    public JwtUtils jwtUtils() { return new JwtUtils(); }
 }
