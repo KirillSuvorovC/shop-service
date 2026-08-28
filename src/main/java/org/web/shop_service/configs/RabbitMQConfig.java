@@ -1,46 +1,38 @@
 package org.web.shop_service.configs;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Slf4j
 @Configuration
 public class RabbitMQConfig {
-    @Value("${spring.rabbitmq.host}")
-    private String host;
-    @Value("${spring.rabbitmq.port}")
-    private int port;
-    @Value("${spring.rabbitmq.username}")
-    private String username;
-    @Value("${spring.rabbitmq.password}")
-    private String password;
+    public static final String ERROR_ROUTING_KEY = "error";
+    public static final String DEAD_LETTER_EXCHANGE = "dead_letter_exchange";
+    public static final String DEAD_LETTER_QUEUE = "errors.dlq";
 
     @Bean
-    @Qualifier("rabbitmq-connection")
-    public CachingConnectionFactory connectionFactory() {
-        final var factory = new CachingConnectionFactory();
-        factory.setHost(host);
-        factory.setPort(port);
-        factory.setUsername(username);
-        factory.setPassword(password);
-        return factory;
+    @Qualifier(DEAD_LETTER_EXCHANGE)
+    public DirectExchange deadLetterExchange() {
+        return new DirectExchange(DEAD_LETTER_EXCHANGE);
     }
 
     @Bean
-    public RabbitAdmin rabbitAdmin(@Qualifier("rabbitmq-connection")
-                                   CachingConnectionFactory factory) {
-        return new RabbitAdmin(factory);
+    @Qualifier(DEAD_LETTER_QUEUE)
+    public Queue deadLetterQueue() {
+        return QueueBuilder
+                .durable(DEAD_LETTER_QUEUE)
+                .build();
     }
 
     @Bean
-    public MessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
+    @Qualifier(DEAD_LETTER_QUEUE)
+    public Binding deadLetterBinding(@Qualifier(DEAD_LETTER_QUEUE) Queue queue,
+                                     @Qualifier(RabbitMQConfig.DEAD_LETTER_EXCHANGE)
+                                     DirectExchange exchange) {
+        return BindingBuilder
+                .bind(queue)
+                .to(exchange)
+                .with(ERROR_ROUTING_KEY);
     }
 }

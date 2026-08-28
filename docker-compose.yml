@@ -2,11 +2,15 @@ services:
   app:
     build: .
     environment:
+      SPRING_ACTIVE_PROFILE: ${SPRING_ACTIVE_PROFILE}
       SPRING_DATASOURCE_URL: jdbc:postgresql://shop_db:5432/${POSTGRES_DB_NAME}
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
+
       RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+
       JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8080:8080"
@@ -14,7 +18,7 @@ services:
       shop_db:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
 
   shop_db:
     image: postgres:18-alpine
@@ -29,7 +33,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_NAME}"]
       interval: 5s
-      timeout: 3s
+      timeout: 5s
       retries: 5
 
   rabbitmq:
@@ -40,6 +44,12 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmqctl status"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 
 volumes:
   postgres_data:
