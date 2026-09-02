@@ -5,8 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.web.shop_service.product.rabbitmq.ProductRabbitMQProperties;
 import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.math.BigDecimal;
@@ -22,6 +24,10 @@ class ProductServiceImplTest {
     private ProductRepository repository;
     @Mock
     private ProductPatchValidator validator;
+    @Mock
+    private ProductRabbitMQProperties properties;
+    @Mock
+    private RabbitTemplate template;
     @InjectMocks
     private ProductServiceImpl productService;
     @Test

@@ -9,4 +9,5 @@ public interface ProductService {
     ProductDTO getProductById(Long id);
     ProductsDTO getProducts(Pageable pageable);
     void deleteProduct(Long id);
+    Product getProductEntityById(Long id);
 }

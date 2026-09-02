@@ -7,7 +7,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.web.shop_service.product.ProductService;
 import org.web.shop_service.product.TestProductFactory;
+import org.web.shop_service.product.events.ProductPriceChangedEvent;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -21,6 +23,8 @@ import static org.mockito.Mockito.*;
 public class ProductPriceHistoryServiceImplTest {
     @Mock
     private ProductPriceHistoryRepository repository;
+    @Mock
+    private ProductService productService;
     @InjectMocks
     private ProductPriceHistoryServiceImpl service;
     @Test
@@ -30,12 +34,14 @@ public class ProductPriceHistoryServiceImplTest {
         final var history = new ProductPriceHistory();
         history.setId(1L);
         history.setProduct(product);
-        ZonedDateTime updated = ZonedDateTime.now(ZoneOffset.UTC).minusDays(5);
+        final var updated = ZonedDateTime.now(ZoneOffset.UTC).minusDays(5);
         history.setUpdatedAt(updated);
         history.setPrice(product.getPrice());
         when(repository.save(any(ProductPriceHistory.class))).thenReturn(history);
+        when(productService.getProductEntityById(1L)).thenReturn(product);
         // Action
-        final ProductPriceHistoryDTO response = service.saveChange(product);
+        final ProductPriceHistoryDTO response = service.saveChange(
+            new ProductPriceChangedEvent(product.getId(), product.getPrice(), updated));
         // Check
         assertNotNull(response);
         assertEquals(history.getId(), response.id());
