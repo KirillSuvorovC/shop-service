@@ -13,6 +13,7 @@ import org.web.shop_service.product.TestProductFactory;
 import org.web.shop_service.utils.JsonUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -33,7 +34,6 @@ public class ProductPriceHistoryControllerTest {
     void getPriceChanges_shouldReturn200AndDto() throws Exception {
         // Given
         final var product = TestProductFactory.createProduct(1L);
-        final BigDecimal price = product.getPrice();
         final var histories = List.of(
                 TestProductFactory.createProductHistory(1L, product),
                 TestProductFactory.createProductHistory(2L, product),
@@ -48,6 +48,9 @@ public class ProductPriceHistoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.histories").isArray())
+                .andExpect(jsonPath("$.histories.length()").value(histories.size()))
+                .andExpect(jsonPath("$.count").value(histories.size()))
                 .andExpect(jsonPath("$.histories[*].id")
                         .value(hasItems(1, 2, 3)))
                 .andExpect(jsonPath("$.histories[*].productId")
@@ -56,5 +59,22 @@ public class ProductPriceHistoryControllerTest {
                         .exists())
                 .andExpect(jsonPath("$.histories[*].price")
                         .value(everyItem(is(50.00))));
+    }
+
+    @Test
+    void getPriceChanges_whenProductsNotFound_shouldReturn200AndEmptyDto() throws Exception {
+        // Given
+        final var pageable = PageRequest.of(0,20);
+        when(service.getPriceChanges(pageable))
+                .thenReturn(new ProductsPriceHistoryDTO(new ArrayList<>()));
+        // Action
+        final String json = JsonUtils.asJson(pageable);
+        mockMvc.perform(get("/api/products/price_history")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.histories").isArray())
+                .andExpect(jsonPath("$.histories.length()").value(0))
+                .andExpect(jsonPath("$.count").value(0));
     }
 }
