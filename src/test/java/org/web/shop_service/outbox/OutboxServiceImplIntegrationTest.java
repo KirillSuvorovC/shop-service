@@ -36,7 +36,7 @@ class OutboxServiceImplIntegrationTest {
     @Test
     void shouldSaveOutboxEventToDatabase() {
         // Given
-        final var event = new Event(ZonedDateTime.now(ZoneOffset.UTC));
+        final var event = new Event();
         final String exchange = "exchange";
         final String routingKey = "routing_key";
         final String payload = JsonUtils.asJson(event);

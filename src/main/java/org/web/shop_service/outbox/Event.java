@@ -4,9 +4,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Getter
-@RequiredArgsConstructor
 public class Event {
-    private final ZonedDateTime createdAt;
+    private final UUID eventId;
+
+    public Event() {
+        this.eventId = UUID.randomUUID();
+    }
 }

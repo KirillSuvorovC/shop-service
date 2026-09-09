@@ -7,9 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +26,7 @@ class OutboxServiceImplTest {
     @Test
     void shouldSendEventSuccess() {
         // Given
-        final Event event = new Event(ZonedDateTime.now(ZoneOffset.UTC));
+        final Event event = new Event();
         final String exchange = "exchange";
         final String routingKey = "routing_key";
 
@@ -41,6 +40,7 @@ class OutboxServiceImplTest {
     @Test
     void getEventsBatch_shouldReturnEvents() {
         // Given
+        ReflectionTestUtils.setField(service, "batchSize", 3);
         final var events = List.of(
                 outboxEvent(1L),
                 outboxEvent(2L),
