@@ -1,9 +1,7 @@
 package org.web.shop_service.outbox;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Getter
