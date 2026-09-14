@@ -1,0 +1,1 @@
+alter table publish_box add constraint publish_box_id_pkey primary key (id)
