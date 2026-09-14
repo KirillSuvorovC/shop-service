@@ -1,5 +1,6 @@
 package org.web.shop_service.outbox;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -37,6 +38,10 @@ public class OutboxProcessorTest {
     private ArgumentCaptor<Message> messageCaptor;
 
     @Test
+    @DisplayName("""
+            Должен успешно отправить событие, если есть,
+            затем удалить отправленное событие
+            """)
     void sendEventsInRabbitMQ_shouldSendSuccess() {
         // Given
         final String payload = "{\"eventId\": \"eventId\"}";
@@ -64,6 +69,7 @@ public class OutboxProcessorTest {
     }
 
     @Test
+    @DisplayName("Когда событий нет - ничего не делаем")
     void sendEventsInRabbitMQ_whenEventsNotFound_doNothing() {
         // Given
         when(service.getEventsBatch()).thenReturn(new ArrayList<>());

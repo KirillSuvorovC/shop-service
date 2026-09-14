@@ -1,5 +1,6 @@
 package org.web.shop_service.outbox;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +26,7 @@ class OutboxServiceImplTest {
 
 
     @Test
+    @DisplayName("Должен успешно сохранить событие в БД")
     void shouldSendEventSuccess() {
         // Given
         final Event event = new Event();
@@ -38,6 +41,7 @@ class OutboxServiceImplTest {
     }
 
     @Test
+    @DisplayName("Должен вернуть события, если существуют")
     void getEventsBatch_shouldReturnEvents() {
         // Given
         ReflectionTestUtils.setField(service, "batchSize", 3);
@@ -55,6 +59,21 @@ class OutboxServiceImplTest {
     }
 
     @Test
+    @DisplayName("Должен вернуть события, если существуют")
+    void getEventsBatch_shouldReturnEmptyList_whenNotFound() {
+        // Given
+        ReflectionTestUtils.setField(service, "batchSize", 3);
+        when(repository.findAll((Pageable) any())).thenReturn(
+                            new PageImpl<>(new ArrayList<>()));
+        // Action
+        final List<OutboxEvent> actualEvents = service.getEventsBatch();
+        // Check
+        assertThat(actualEvents).isEmpty();
+        verify(repository, times(1)).findAll((Pageable) any());
+    }
+
+    @Test
+    @DisplayName("Должен удалить все переданные события")
     void shouldDeleteEventsSuccess() {
         // Given
         final var events = List.of(

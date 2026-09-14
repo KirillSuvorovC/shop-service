@@ -1,5 +1,6 @@
 package org.web.shop_service.outbox;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +35,7 @@ class OutboxServiceImplIntegrationTest {
     private OutBoxRepository repository;
 
     @Test
+    @DisplayName("Должен успешно сохранить событие в БД")
     void shouldSaveOutboxEventToDatabase() {
         // Given
         final var event = new Event();
