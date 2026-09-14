@@ -1,0 +1,1 @@
+create index publish_box_consumer on publish_box using hash (consumer)
