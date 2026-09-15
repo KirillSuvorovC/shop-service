@@ -11,17 +11,14 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.web.shop_service.TestContainersFactory;
-import org.web.shop_service.MockRabbitMQConfig;
+import org.web.shop_service.TestRabbitMQConfig;
 import org.web.shop_service.utils.JsonUtils;
-
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-@Import(MockRabbitMQConfig.class)
+@Import(TestRabbitMQConfig.class)
 @Testcontainers
 class OutboxServiceImplIntegrationTest {
     @Container
