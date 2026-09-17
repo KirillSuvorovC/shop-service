@@ -1,6 +1,8 @@
 package org.web.shop_service;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ValidationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,5 +37,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({EntityNotFoundException.class, UsernameNotFoundException.class})
     public ResponseEntity<ResponseError> handleNotFound(Exception e) {
         return ResponseError.asEntity(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler({OptimisticLockingFailureException.class, OptimisticLockException.class})
+    public ResponseEntity<ResponseError> handleConflict(Exception e) {
+        return ResponseError.asEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 }
