@@ -1,12 +1,15 @@
 package org.web.shop_service.product;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ValidationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,6 +44,7 @@ class ProductControllerTest {
     private MockMvc mockMvc;
 
     @Test
+    @DisplayName("Должен успешно создать продукт и вернуть 201")
     void createProduct_shouldReturn201AndDto() throws Exception {
         // Given
         final var product = TestProductFactory.createProduct(1L);
@@ -57,6 +61,7 @@ class ProductControllerTest {
 
     @ParameterizedTest
     @MethodSource("invalidArguments")
+    @DisplayName("При некорректном post-запросе вернуть 400")
     void createProduct_whenInvalidRequest_shouldReturn400(String productName,
                                                           BigDecimal productPrice)
             throws Exception {
@@ -70,6 +75,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("Должен успешно полностью обновить продукт и вернуть 200")
     void updateProduct_shouldReturn200AndDto() throws Exception {
         // Given
         final var product = TestProductFactory.createProduct(1L);
@@ -84,9 +90,9 @@ class ProductControllerTest {
         expectProduct(resultActions, HttpStatus.OK, product);
     }
 
-
     @ParameterizedTest
     @MethodSource("invalidArguments")
+    @DisplayName("Должен вернуть 400, если update-запрос некорректный")
     void updateProduct_whenInvalidRequest_shouldReturn400(String productName,
                                                           BigDecimal productPrice)
             throws Exception {
@@ -100,7 +106,24 @@ class ProductControllerTest {
     }
 
     @ParameterizedTest
+    @MethodSource("optimisticLockExceptions")
+    @DisplayName("Если произошла оптимистичная блокировка - вернуть 409")
+    void updateProduct_whenVersionNotMatch_shouldReturn409(Exception exception)
+            throws Exception {
+        // Given
+        final var request = new ProductUpdateRequest("Product",
+                                        new BigDecimal("50.00"));
+        when(service.updateProduct(any(), any())).thenThrow(exception);
+        // Action && Check
+        final var resultActions = mockMvc.perform(put("/api/products/1")
+                .contentType(APPLICATION_JSON)
+                .content(asJson(request)));
+        expectError(resultActions, HttpStatus.CONFLICT);
+    }
+
+    @ParameterizedTest
     @MethodSource("validNullArguments")
+    @DisplayName("Должен успешно частично обновить продукт и вернуть 200")
     void patchProduct_shouldReturn200AndDto(String productName,
                                             BigDecimal productPrice)
             throws Exception {
@@ -118,6 +141,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("При некорректном patch-запросе вернуть 400")
     void patchProduct_whenInvalidRequest_shouldReturn400()
             throws Exception {
         // Given
@@ -132,6 +156,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("Должен успешно вернуть продукт и 200")
     void getProductById_shouldReturn200AndDto() throws Exception {
         // Given
         final var product = TestProductFactory.createProduct(1L);
@@ -142,6 +167,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("Должен вернуть 404, если продукт не найден")
     void getProductById_whenProductNonExists_shouldReturn404() throws Exception {
         // Given
         when(service.getProductById(1L)).thenThrow(
@@ -152,6 +178,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("Должен вернуть продукты и 200")
     void getProducts_shouldReturn200AndDto() throws Exception {
         // Given
         final var products = List.of(
@@ -188,6 +215,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("Если продуктов нет - вернуть 200 и пустое DTO")
     void getProducts_whenProductsEmpty_shouldReturn200AndEmptyDto() throws Exception {
         // Given
         final var request = PageRequest.of(0, 20);
@@ -205,6 +233,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("Должен удалить продукт и вернуть 204")
     void deleteProductById_shouldReturn204() throws Exception {
         // Action && Check
         mockMvc.perform(delete("/api/products/1"))
@@ -218,7 +247,6 @@ class ProductControllerTest {
                 arguments(null, null)
         );
     }
-
     static Stream<Arguments> invalidArguments() {
         return Stream.of(
                 arguments("Product", new BigDecimal("-1")),
@@ -227,6 +255,13 @@ class ProductControllerTest {
                 arguments(null, new BigDecimal("-1")),
                 arguments("n", null),
                 arguments(null, null)
+        );
+    }
+
+    static Stream<Arguments> optimisticLockExceptions() {
+        return Stream.of(
+                arguments(new OptimisticLockException()),
+                arguments(new OptimisticLockingFailureException("Data is old, reload page"))
         );
     }
 

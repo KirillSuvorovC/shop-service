@@ -1,5 +1,6 @@
 package org.web.shop_service.product.price_history;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,7 @@ public class ProductPriceHistoryServiceImplTest {
     @InjectMocks
     private ProductPriceHistoryServiceImpl service;
     @Test
+    @DisplayName("После успешного сохранения изменения цены вернуть DTO")
     void saveChange_shouldReturnDto() {
         // Given
         final var product = TestProductFactory.createProduct(1L);
@@ -52,6 +54,7 @@ public class ProductPriceHistoryServiceImplTest {
     }
 
     @Test
+    @DisplayName("Должен вернуть список изменений цен")
     void getPriceChanges_shouldReturnDto() {
         // Given
         final var product = TestProductFactory.createProduct(1L);
@@ -79,6 +82,7 @@ public class ProductPriceHistoryServiceImplTest {
     }
 
     @Test
+    @DisplayName("Если пустой список изменений цен - вернуть пустое DTO")
     void getPriceChanges_shouldReturnEmptyDto() {
         // Given
         final var histories = new ArrayList<ProductPriceHistory>();

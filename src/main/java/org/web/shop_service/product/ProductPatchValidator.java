@@ -10,14 +10,14 @@ import java.math.RoundingMode;
 @Component
 public class ProductPatchValidator {
     public void validate(ProductPatchRequest request) {
-        final String name = request.name();
+        final String name = request.getName();
         if(name != null) {
             if(StringUtils.isBlank(name))
                 throw new ValidationException(ProductCreateRequest.INVALID_NOT_BLANK_NAME);
             if(name.length() < ProductCreateRequest.MIN_SIZE_NAME)
                 throw new ValidationException(ProductCreateRequest.INVALID_SIZE_NAME);
         }
-        final BigDecimal newPrice = request.price();
+        final BigDecimal newPrice = request.getPrice();
         if(newPrice != null) {
             final BigDecimal roundedPrice = newPrice.setScale(2, RoundingMode.HALF_UP);
             if(roundedPrice.compareTo(BigDecimal.ZERO) <= 0)

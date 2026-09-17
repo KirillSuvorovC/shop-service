@@ -1,47 +1,65 @@
 package org.web.shop_service.product;
 
 import jakarta.validation.ValidationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @ExtendWith(MockitoExtension.class)
 class ProductPatchValidatorTest extends MockitoExtension {
     @InjectMocks
     private ProductPatchValidator validator;
-    @Test
-    void validate_whenRequestIsValid_shouldNotThrowException() {
+    @ParameterizedTest
+    @MethodSource("validArguments")
+    @DisplayName("Не бросает исключение, если запрос корректный")
+    void validate_whenRequestIsValid_shouldNotThrowException(String name,
+                                                             BigDecimal price) {
         // Given
-        final var request = new ProductPatchRequest("Valid Name",
-                                                  new BigDecimal("50.00"));
+        final var request = new ProductPatchRequest(name, price);
         // Action && Check
         assertDoesNotThrow(() -> validator.validate(request));
     }
 
-    @Test
-    void validate_whenNameIsInvalid_throwException() {
-        invokeValidate("IN", "50.00");
-    }
-
-    @Test
-    void validate_whenPriceLessOrEqualZero_throwException() {
-        // Case 1:
-        invokeValidate("Valid Name", "0.00");
-        // Case 2:
-        invokeValidate("Valid Name", "0.001");
-        // Case 3:
-        invokeValidate("Valid Name", "-1");
-    }
-
-    private void invokeValidate(String name, String price) {
+    @ParameterizedTest
+    @MethodSource("invalidArguments")
+    @DisplayName("Бросает исключение, если запрос некорретный")
+    void validate_whenInvalidRequest_throwException(String name,
+                                                    BigDecimal price) {
         // Given
-        final var request = new ProductPatchRequest(name, new BigDecimal(price));
+        final var request = new ProductPatchRequest(name, price);
         // Action && Check
-        assertThrows(ValidationException.class, () -> validator.validate(request));
+        assertThrows(ValidationException.class,
+                () -> validator.validate(request));
+    }
+
+    static Stream<Arguments> validArguments() {
+        return Stream.of(
+                arguments("Product", new BigDecimal("50.00")),
+                arguments(null, new BigDecimal("50.00")),
+                arguments("Product", null),
+                arguments(null, null)
+        );
+    }
+
+    static Stream<Arguments> invalidArguments() {
+        return Stream.of(
+                arguments("Product", new BigDecimal("-1")),
+                arguments("Product", new BigDecimal("0.001")),
+                arguments("n", new BigDecimal("50.00")),
+                arguments("n", new BigDecimal("-1")),
+                arguments(null, new BigDecimal("-1")),
+                arguments("n", null)
+        );
     }
 }

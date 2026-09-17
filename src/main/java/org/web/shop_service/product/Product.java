@@ -14,10 +14,14 @@ import java.time.ZonedDateTime;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
+    @Column(name = "product_id", nullable = false, unique = true)
     private Long id;
+    @Column(nullable = false, length = 150)
     private String name;
+    @Column(nullable = false)
     private BigDecimal price = new BigDecimal("0.00");
     @Column(name = "created_at", columnDefinition = "timestamp with time zone")
     private ZonedDateTime createdAt;
+    @Version
+    private Long version;
 }

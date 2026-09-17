@@ -39,8 +39,12 @@ public class GlobalExceptionHandler {
         return ResponseError.asEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
-    @ExceptionHandler({OptimisticLockingFailureException.class, OptimisticLockException.class})
-    public ResponseEntity<ResponseError> handleConflict(Exception e) {
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ResponseError> handleConflict(OptimisticLockingFailureException e) {
         return ResponseError.asEntity(HttpStatus.CONFLICT, e.getMessage());
+    }
+    @ExceptionHandler(OptimisticLockException.class)
+    public ResponseEntity<ResponseError> handleConflict() {
+        return ResponseError.asEntity(HttpStatus.CONFLICT, "Data is old, reload page");
     }
 }

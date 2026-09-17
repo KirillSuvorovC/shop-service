@@ -1,0 +1,1 @@
+alter table products add column version int8 default 0;

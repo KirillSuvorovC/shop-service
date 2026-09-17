@@ -1,5 +1,6 @@
 package org.web.shop_service.product.price_history;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,6 +32,7 @@ public class ProductPriceHistoryControllerTest {
     private ProductPriceHistoryService service;
 
     @Test
+    @DisplayName("Должен успешно вернуть изменения цены и 200")
     void getPriceChanges_shouldReturn200AndDto() throws Exception {
         // Given
         final var product = TestProductFactory.createProduct(1L);
@@ -62,6 +64,7 @@ public class ProductPriceHistoryControllerTest {
     }
 
     @Test
+    @DisplayName("Если изменений цен нет - вернуть 200 и пустое DTO")
     void getPriceChanges_whenProductsNotFound_shouldReturn200AndEmptyDto() throws Exception {
         // Given
         final var pageable = PageRequest.of(0,20);
