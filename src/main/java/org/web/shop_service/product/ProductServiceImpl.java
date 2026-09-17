@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.web.shop_service.outbox.OutboxService;
 import org.web.shop_service.product.events.ProductPriceChangedEvent;
 import org.web.shop_service.product.rabbitmq.ProductRabbitMQProperties;
 import org.web.shop_service.utils.exceptions.EntityNotFoundException;
@@ -17,9 +19,10 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository repository;
     private final ProductPatchValidator validator;
     private final ProductRabbitMQProperties productProperties;
-    private final RabbitTemplate rabbitTemplate;
+    private final OutboxService outboxService;
 
     @Override
+    @Transactional
     public ProductDTO createProduct(ProductCreateRequest request) {
         final var product = new Product();
         product.setName(request.name());
@@ -31,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductDTO updateProduct(Long id, ProductUpdateRequest request) {
         final var product = getProductEntityById(id);
         product.setName(request.name());
@@ -41,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductDTO patchProduct(Long id, ProductPatchRequest request) {
         final var product = getProductEntityById(id);
         validator.validate(request);
@@ -80,9 +85,7 @@ public class ProductServiceImpl implements ProductService {
     private void publishEvent(Product product, ZonedDateTime updatedAt) {
         final var event = new ProductPriceChangedEvent(product.getId(),
                                         product.getPrice(), updatedAt);
-        // TODO: позже применить паттерн Transactional OutBox
-        //  для гарантии доставки сообщения
-        rabbitTemplate.convertAndSend(
+        outboxService.sendEvent(
                 productProperties.getExchange(),
                 productProperties.getRoutingKeyPriceChanged(),
                 event);

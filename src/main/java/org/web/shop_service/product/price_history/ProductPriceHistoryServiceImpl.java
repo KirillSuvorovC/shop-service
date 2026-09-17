@@ -16,12 +16,13 @@ public class ProductPriceHistoryServiceImpl implements ProductPriceHistoryServic
 
     @Override
     public ProductPriceHistoryDTO saveChange(ProductPriceChangedEvent event) {
-        final var product = service.getProductEntityById(event.id());
+        final var product = service.getProductEntityById(event.getProductId());
         var history = new ProductPriceHistory();
         history.setProduct(product);
-        history.setUpdatedAt(event.updatedAt());
-        history.setPrice(event.newPrice());
+        history.setUpdatedAt(event.getUpdatedAt());
+        history.setPrice(event.getNewPrice());
         history = repository.save(history);
+        log.info("Changed price for product with id {}", product.getId());
         return ProductPriceHistoryDTO.fromHistory(history);
     }
 
