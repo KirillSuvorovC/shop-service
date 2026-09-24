@@ -16,15 +16,19 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+// TODO: добавить индекс для колонки таблицы users.username
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+
+    /**
+     * @throws UsernameNotFoundException если пользователь не найден
+     * @return загруженный {@link UserDetails}
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        final var user = userRepository.findByUsername(username)
-                        .orElseThrow(() -> new UsernameNotFoundException(
-                                "user with username %s not found".formatted(username)));
+        final var user = getUserByUsername(username);
         final var authorities = List.of(new SimpleGrantedAuthority(user.getRole().getName()));
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(), user.getPassword(), authorities);
@@ -32,6 +36,16 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    /**
+     * @throws UsernameNotFoundException если пользователь не найден
+     * @return найденный {@link User}
+     */
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "user with username %s not found".formatted(username)));
     }
 
     public UserDetails createUser(UserRegisterRequest request) {

@@ -3,6 +3,7 @@ package org.web.shop_service.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,10 +12,12 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -31,7 +34,8 @@ public class SecurityConfig {
     private final UserService service;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+    @Profile("!dev")
+    public SecurityFilterChain securityFilterChainNonDev(HttpSecurity http,
                         DaoAuthenticationProvider provider,
                         JwtAuthenticationFilter jwtFilter,
                         UnauthorizedEntryPoint unauthorizedEntryPoint) throws Exception {
@@ -50,6 +54,25 @@ public class SecurityConfig {
                 .authenticationProvider(provider)
                 .addFilterBefore(jwtFilter, CsrfFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(), ExceptionTranslationFilter.class)
+                .build();
+    }
+
+    @Bean
+    @Profile("dev")
+    public SecurityFilterChain securityFilterChainDev(HttpSecurity http,
+                        DaoAuthenticationProvider provider,
+                        JwtAuthenticationFilter jwtFilter,
+                        UnauthorizedEntryPoint unauthorizedEntryPoint) throws Exception {
+        return http
+                .csrf(CsrfConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(handling ->
+                        handling.authenticationEntryPoint(unauthorizedEntryPoint))
+                .authenticationProvider(provider)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

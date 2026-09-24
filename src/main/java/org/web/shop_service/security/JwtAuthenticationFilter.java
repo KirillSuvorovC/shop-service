@@ -6,14 +6,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.web.shop_service.user.CurrentUser;
+import org.web.shop_service.user.UserService;
 import org.web.shop_service.utils.JwtUtils;
-import org.web.shop_service.utils.ResponseError;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
+    private final UserService service;
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -56,8 +57,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            final var user = service.getUserByUsername(username);
             final var token = new UsernamePasswordAuthenticationToken(
-                    username, null, authorities);
+                    new CurrentUser(user), null, authorities);
             SecurityContextHolder.getContext().setAuthentication(token);
         }
         filterChain.doFilter(request, response);
