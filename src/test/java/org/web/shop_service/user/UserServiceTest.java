@@ -1,6 +1,7 @@
 package org.web.shop_service.user;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,11 +13,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.web.shop_service.role.Role;
 import org.web.shop_service.role.RoleService;
+import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Юнит-тесты отсутствуют для метода {@link UserService#findByUsername(String)}.
+ * Причина: простая делегация {@link UserRepository#findByUsername(String)}
+ */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     public static final String DEFAULT_USERNAME = "username";
@@ -31,7 +37,7 @@ class UserServiceTest {
     private UserService userService;
 
     @Test
-    @DisplayName("Должен успешно создать пользователя")
+    @DisplayName("Должен успешно создать пользователя и вернуть его детали")
     void createUser_shouldReturnUserDetails() {
         // Given
         final String encodedPassword = "encodedPassword";
@@ -54,85 +60,95 @@ class UserServiceTest {
         assertEquals(Role.ROLE_USER, authority.get());
     }
 
-    @Test
-    @DisplayName("Должен успешно вернуть данные пользователя")
-    void loadUserByUsername_shouldReturnUserDetails() {
-        // Given
-        final var user = createUser();
-        when(repository.findByUsername(any())).thenReturn(Optional.of(user));
-        // Action
-        final var userDetails = userService.loadUserByUsername(DEFAULT_USERNAME);
-        final var authority = userDetails.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .findFirst();
-        // Check
-        assertNotNull(userDetails);
-        assertNotNull(authority);
-        assertEquals(DEFAULT_USERNAME, userDetails.getUsername());
-        assertEquals(DEFAULT_PASSWORD, userDetails.getPassword());
-        assertEquals(Role.ROLE_USER, authority.get());
+    @Nested
+    @DisplayName("Загрузка пользователя по имени")
+    class LoadUserByUsername {
+        @Test
+        @DisplayName("Вернуть существующие данные пользователя")
+        void shouldReturnUserDetails() {
+            // Given
+            final var user = createUser();
+            when(repository.findByUsername(any())).thenReturn(Optional.of(user));
+            // Action
+            final var userDetails = userService.loadUserByUsername(DEFAULT_USERNAME);
+            final var authority = userDetails.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst();
+            // Check
+            assertNotNull(userDetails);
+            assertNotNull(authority);
+            assertTrue(authority.isPresent());
+            assertEquals(DEFAULT_USERNAME, userDetails.getUsername());
+            assertEquals(DEFAULT_PASSWORD, userDetails.getPassword());
+            assertEquals(Role.ROLE_USER, authority.get());
+        }
+
+        @Test
+        @DisplayName("Если пользователь не найден - бросить исключение")
+        void whenUserNotFound_ThrowException() {
+            // Given
+            when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.empty());
+            // Action && Check
+            assertThrows(UsernameNotFoundException.class,
+                    () -> userService.loadUserByUsername(DEFAULT_USERNAME));
+        }
     }
 
-    @Test
-    @DisplayName("Если пользователь не найден - бросать исключение")
-    void loadUserByUsername_whenUserNotFound_ThrowException() {
-        // Given
-        when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.empty());
-        // Action && Check
-        assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(DEFAULT_USERNAME));
-    }
+    @Nested
+    @DisplayName("Поиск пользователя по имени")
+    class GetUser {
+        @Test
+        @DisplayName("Вернуть существующего пользователя по имени")
+        void shouldReturnUserByUsername() {
+            // Given
+            final var user = createUser();
+            when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.of(user));
+            // Action
+            final User result = userService.getUserByUsername(DEFAULT_USERNAME);
+            // Check
+            assertNotNull(result);
+            assertEquals(1L, result.getId());
+            assertEquals(DEFAULT_USERNAME, result.getUsername());
+            assertEquals(DEFAULT_PASSWORD, result.getPassword());
+            assertEquals(Role.ROLE_USER, result.getRole().getName());
+        }
 
-    @Test
-    @DisplayName("Должен успешно вернуть пользователя")
-    void findByUsername_shouldReturnUser() {
-        // Given
-        final var user = createUser();
-        when(repository.findByUsername(any())).thenReturn(Optional.of(user));
-        // Action
-        final User result = userService.findByUsername(DEFAULT_USERNAME).get();
-        // Check
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals(DEFAULT_USERNAME, result.getUsername());
-        assertEquals(DEFAULT_PASSWORD, result.getPassword());
-        assertEquals(Role.ROLE_USER, result.getRole().getName());
-    }
+        @Test
+        @DisplayName("Если пользователь по имени не найден - бросить исключение")
+        void whenUserNotFoundByUsername_ThrowException() {
+            // Given
+            when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.empty());
+            // Action && Check
+            assertThrows(UsernameNotFoundException.class,
+                    () -> userService.getUserByUsername(DEFAULT_USERNAME));
+        }
 
-    @Test
-    @DisplayName("Должен успешно вернуть несуществующего пользователя")
-    void findByUsername_shouldReturnNonExistsUser() {
-        // Given
-        when(repository.findByUsername(any())).thenReturn(Optional.empty());
-        // Action
-        final Optional<User> user = userService.findByUsername("unknown");
-        // Check
-        assertFalse(user.isPresent());
-    }
+        @Test
+        @DisplayName("Вернуть существующего пользователя по ID")
+        void shouldReturnUserById() {
+            // Given
+            final var user = createUser();
+            when(repository.findById(1L)).thenReturn(Optional.of(user));
+            // Action
+            final User result = userService.getUserById(1L);
+            // Check
+            assertNotNull(result);
+            assertEquals(1L, result.getId());
+            assertEquals(DEFAULT_USERNAME, result.getUsername());
+            assertEquals(DEFAULT_PASSWORD, result.getPassword());
+            assertEquals(Role.ROLE_USER, result.getRole().getName());
+        }
 
-    @Test
-    @DisplayName("Должен успешно вернуть пользователя")
-    void getUserByUsername_shouldReturnUser() {
-        // Given
-        final var user = createUser();
-        when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.of(user));
-        // Action
-        final User result = userService.getUserByUsername(DEFAULT_USERNAME);
-        // Check
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals(DEFAULT_USERNAME, result.getUsername());
-        assertEquals(DEFAULT_PASSWORD, result.getPassword());
-        assertEquals(Role.ROLE_USER, result.getRole().getName());
-    }
-
-    @Test
-    @DisplayName("Если пользователь не найден - бросать исключение")
-    void getUserByUsername_whenUserNotFound_ThrowException() {
-        // Given
-        when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.empty());
-        // Action && Check
-        assertThrows(UsernameNotFoundException.class, () -> userService.getUserByUsername(DEFAULT_USERNAME));
+        @Test
+        @DisplayName("Если пользователь по ID не найден - бросить исключение")
+        void getUserById_whenUserNotFound_ThrowException() {
+            // Given
+            when(repository.findById(1L)).thenReturn(Optional.empty());
+            // Action && Check
+            assertThrows(EntityNotFoundException.class,
+                    () -> userService.getUserById(1L));
+        }
     }
 
     private User createUser() {

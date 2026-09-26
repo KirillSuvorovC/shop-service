@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web.shop_service.role.Role;
 import org.web.shop_service.role.RoleService;
+import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +46,17 @@ public class UserService implements UserDetailsService {
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "user with username %s not found".formatted(username)));
+                        "user not found with username " + username));
+    }
+
+    /**
+     * @throws EntityNotFoundException если пользователь не найден
+     * @return найденный {@link User}
+     */
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "user not found with id " + id));
     }
 
     public UserDetails createUser(UserRegisterRequest request) {
