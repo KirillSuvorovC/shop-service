@@ -1,5 +1,6 @@
 package org.web.shop_service.orders;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.Size;
 public record OrderCreateRequest(
         @NotEmpty(message = INVALID_ORDER_ITEMS)
         @Size(min = 1, max = 10, message = INVALID_ORDER_ITEMS)
+        @Valid
         Item[] items
 )
 {
