@@ -38,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Transactional
     public OrderDTO create(OrderCreateRequest request, CurrentUser currentUser) {
-        final var user = userService.getUserById(currentUser.id());
+        final var user = userService.getUserById(currentUser.getId());
         final var requestItems = request.items();
         final var savedItems = new ArrayList<OrderItem>(requestItems.length);
         final var order = new Order();
@@ -86,7 +86,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrdersDTO findAllByUserId(CurrentUser user, Pageable pageable) {
-        final var orders = orderRepository.findAllByUserId(user.id(), pageable)
+        final var orders = orderRepository.findAllByUserId(user.getId(), pageable)
                                           .getContent();
         return new OrdersDTO(orders);
     }
