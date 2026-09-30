@@ -1,8 +1,10 @@
 package org.web.shop_service.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -14,6 +16,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
@@ -23,15 +27,17 @@ import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.web.shop_service.annotations.PublicEndPoint;
+import org.web.shop_service.role.RoleService;
+import org.web.shop_service.user.UserRepository;
 import org.web.shop_service.user.UserService;
 
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 @RequiredArgsConstructor
 @Configuration
+@Import({AuthenticationConfig.class, PasswordConfig.class})
 public class SecurityConfig {
     private final RequestMappingHandlerMapping mapping;
-    private final UserService service;
 
     @Bean
     @Profile("!dev")
@@ -77,22 +83,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(
-                                PasswordEncoder passwordEncoder) {
-        final var provider = new DaoAuthenticationProvider(service);
-        provider.setPasswordEncoder(passwordEncoder);
-        return provider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
-
-    @Bean
-    public RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.fromHierarchy("ROLE_ADMIN > ROLE_USER");
+    public UserDetailsService userDetailsService(UserRepository repository,
+                                                 PasswordEncoder passwordEncoder,
+                                                 RoleService roleService) {
+        return new UserService(repository, passwordEncoder, roleService);
     }
 
     private String[] getPublicEndPoints() {

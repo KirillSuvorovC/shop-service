@@ -5,8 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.web.shop_service.user.UserService;
 import org.web.shop_service.utils.JwtUtils;
 
+import static org.mockito.Mockito.mock;
+
+// TODO: реализовать позже другую тестовую конфигурацию
+//  с моком UserService для проверки прав пользователя
+//  через @PreAuthorize, а сейчас этот класс - временное
+//  решение для старых контроллеров
 @TestConfiguration
 public class TestSecurityConfig {
     @Bean
@@ -18,4 +25,9 @@ public class TestSecurityConfig {
 
     @Bean
     public JwtUtils jwtUtils() { return new JwtUtils(); }
+
+    @Bean
+    public UserService userService() {
+        return mock(UserService.class);
+    }
 }
