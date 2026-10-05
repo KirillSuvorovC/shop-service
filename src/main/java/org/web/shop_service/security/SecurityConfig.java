@@ -82,13 +82,6 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(UserRepository repository,
-                                                 PasswordEncoder passwordEncoder,
-                                                 RoleService roleService) {
-        return new UserService(repository, passwordEncoder, roleService);
-    }
-
     private String[] getPublicEndPoints() {
         return mapping.getHandlerMethods().entrySet()
                 .stream()

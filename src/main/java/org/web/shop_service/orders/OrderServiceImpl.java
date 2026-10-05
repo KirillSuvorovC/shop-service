@@ -86,8 +86,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrdersDTO findAllByUserId(CurrentUser user, Pageable pageable) {
-        final var orders = orderRepository.findAllByUserId(user.getId(), pageable)
-                                          .getContent();
+        final var orders = orderRepository.findAllByUserId(user.getId(), pageable);
         return new OrdersDTO(orders);
     }
 
