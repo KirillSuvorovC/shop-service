@@ -15,10 +15,13 @@ public class GlobalResponseBodyHandler implements ResponseBodyAdvice<VersionedRe
     @Override
     public boolean supports(MethodParameter returnType,
                             Class<? extends HttpMessageConverter<?>> converterType) {
-        final Class<?> bodyType = ResolvableType.forMethodParameter(returnType)
-                .getGeneric(0)
-                .toClass();
+        final var resolveType = ResolvableType.forMethodParameter(returnType);
+        Class<?> bodyType = resolveType.toClass();
 
+        if(VersionedResponse.class.isAssignableFrom(bodyType)) return true;
+
+        bodyType = resolveType.getGeneric(0)
+                              .toClass();
         return VersionedResponse.class.isAssignableFrom(bodyType);
     }
 
