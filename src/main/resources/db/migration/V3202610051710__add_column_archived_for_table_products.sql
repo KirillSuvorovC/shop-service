@@ -1,0 +1,1 @@
+alter table products add column archived bool not null default false;

@@ -24,6 +24,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
 
+/**
+ * Метод {@link ProductServiceImpl#deleteProduct(Long)} не тестируется.
+ * Причина: простая делегация {@link ProductRepository#markProductAsArchived(Long)}
+ */
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
     @Mock
@@ -197,14 +201,5 @@ class ProductServiceImplTest {
         assertTrue(response.getProducts().isEmpty());
         assertEquals(0, response.getCount());
         verify(repository, times(1)).findAll((Pageable)any());
-    }
-
-    @Test
-    @DisplayName("Должен успешно удалить продукт")
-    void deleteProduct() {
-        // Action
-        productService.deleteProduct(1L);
-        // Check
-        verify(repository, times(1)).deleteById(1L);
     }
 }

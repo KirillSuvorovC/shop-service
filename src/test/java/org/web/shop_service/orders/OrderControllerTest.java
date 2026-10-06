@@ -7,8 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -21,12 +19,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.web.shop_service.TestSecurityAOPConfig;
-import org.web.shop_service.security.SecurityConfig;
+import org.web.shop_service.TestUserDefaults;
 import org.web.shop_service.user.CurrentUser;
-import org.web.shop_service.user.TestUserFactory;
-import org.web.shop_service.user.User;
 import org.web.shop_service.utils.JsonUtils;
-import org.web.shop_service.utils.JwtUtils;
 import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.util.List;
@@ -47,18 +42,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(OrderController.class)
 @Import(TestSecurityAOPConfig.class)
 class OrderControllerTest {
-    private static final User ENTITY_USER = TestUserFactory.defaultUserEntity();
-    private static final User ENTITY_ADMIN = TestUserFactory.defaultAdminEntity();
-    private static final CurrentUser CURRENT_USER = TestUserFactory.defaultAuthUser();
-    private static final CurrentUser CURRENT_ADMIN = TestUserFactory.defaultAuthAdmin();
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     private OrderService orderService;
-
-    @MockitoBean
-    private JwtUtils jwtUtils;
 
     @Nested
     @DisplayName("POST /api/orders — создание заказа")
@@ -71,10 +59,11 @@ class OrderControllerTest {
         void shouldReturn201AndDto() throws Exception {
             // Given
             final var request = createRequest(1L, 1);
-            final var order = TestOrderFactory.order(1L, ENTITY_USER);
+            final var order = TestOrderFactory.order(1L, TestUserDefaults.ENTITY_USER);
             when(orderService.create(any(), any())).thenReturn(new OrderDTO(order));
             // Action
-            performRequest(HttpMethod.POST, URI_TEMPLATE, request, CURRENT_USER)
+            performRequest(HttpMethod.POST, URI_TEMPLATE, request,
+                    TestUserDefaults.CURRENT_USER)
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id").value(1))
                     .andExpect(jsonPath("$.status").value("NEW"))
@@ -88,7 +77,8 @@ class OrderControllerTest {
         void shouldReturn400WhenInvalidRequest(OrderCreateRequest request) throws Exception {
             // Action && Check
             final var resultActions = performRequest(HttpMethod.POST, URI_TEMPLATE,
-                                                     request, CURRENT_USER);
+                                                     request,
+                                                     TestUserDefaults.CURRENT_USER);
                     // Check
             checkError(resultActions, HttpStatus.BAD_REQUEST);
         }
@@ -102,7 +92,8 @@ class OrderControllerTest {
                     new EntityNotFoundException("Product not found"));
             // Action
             final var resultActions = performRequest(HttpMethod.POST, URI_TEMPLATE,
-                                                     request, CURRENT_USER);
+                                                     request,
+                                                     TestUserDefaults.CURRENT_USER);
             checkError(resultActions, HttpStatus.NOT_FOUND);
         }
 
@@ -143,11 +134,13 @@ class OrderControllerTest {
         void shouldReturn200AndDto() throws Exception {
             // Given
             final var request = createRequest();
-            final var order = TestOrderFactory.order(1L, ENTITY_ADMIN);
+            final var order = TestOrderFactory.order(1L,
+                            TestUserDefaults.ENTITY_ADMIN);
             order.setStatus(OrderStatus.CANCELLED);
             when(orderService.updateStatus(anyLong(), any())).thenReturn(new OrderDTO(order));
             // Action
-            performRequest(HttpMethod.PUT, URI_TEMPLATE, request, CURRENT_ADMIN)
+            performRequest(HttpMethod.PUT, URI_TEMPLATE, request,
+                           TestUserDefaults.CURRENT_ADMIN)
                     // Check
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(1))
@@ -161,7 +154,8 @@ class OrderControllerTest {
             final var request = new OrderUpdateStatusRequest("unknown");
             // Action && Check
             final var resultActions = performRequest(HttpMethod.PUT, URI_TEMPLATE,
-                                                     request, CURRENT_ADMIN);
+                                                     request,
+                                                     TestUserDefaults.CURRENT_ADMIN);
             checkError(resultActions, HttpStatus.BAD_REQUEST);
         }
 
@@ -174,7 +168,8 @@ class OrderControllerTest {
                     .thenThrow(new EntityNotFoundException("Order not found"));
             // Action && Check
             final var resultActions = performRequest(HttpMethod.PUT, URI_TEMPLATE,
-                                                     request, CURRENT_ADMIN);
+                                                     request,
+                                                     TestUserDefaults.CURRENT_ADMIN);
             checkError(resultActions, HttpStatus.NOT_FOUND);
         }
 
@@ -187,7 +182,8 @@ class OrderControllerTest {
                     .thenThrow(new OptimisticLockingFailureException("Data old, reload page"));
             // Action && Check
             final var resultActions = performRequest(HttpMethod.PUT, URI_TEMPLATE,
-                                                     request, CURRENT_ADMIN);
+                                                     request,
+                                                     TestUserDefaults.CURRENT_ADMIN);
             checkError(resultActions, HttpStatus.CONFLICT);
         }
 
@@ -197,7 +193,8 @@ class OrderControllerTest {
             // Given
             final var request = createRequest();
             // Action && Check
-            performRequest(HttpMethod.PUT, URI_TEMPLATE, request, CURRENT_USER)
+            performRequest(HttpMethod.PUT, URI_TEMPLATE, request,
+                    TestUserDefaults.CURRENT_USER)
                     .andExpect(status().isForbidden());
         }
 
@@ -215,10 +212,11 @@ class OrderControllerTest {
         @DisplayName("Возвращает 200 и DTO, если заказ найден")
         void shouldReturn200AndDto() throws Exception {
             // Given
-            final var order = TestOrderFactory.order(1L, ENTITY_ADMIN);
+            final var order = TestOrderFactory.order(1L,
+                            TestUserDefaults.ENTITY_ADMIN);
             when(orderService.findById(1L)).thenReturn(new OrderDTO(order));
             // Action
-            performGetRequest(URI_TEMPLATE, CURRENT_ADMIN)
+            performGetRequest(URI_TEMPLATE, TestUserDefaults.CURRENT_ADMIN)
                     // Check
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(1))
@@ -234,7 +232,8 @@ class OrderControllerTest {
             when(orderService.findById(1L))
                     .thenThrow(new EntityNotFoundException("Order not found"));
             // Action && Check
-            final var resultActions = performGetRequest(URI_TEMPLATE, CURRENT_ADMIN);
+            final var resultActions = performGetRequest(URI_TEMPLATE,
+                                    TestUserDefaults.CURRENT_ADMIN);
             checkError(resultActions, HttpStatus.NOT_FOUND);
         }
 
@@ -242,7 +241,7 @@ class OrderControllerTest {
         @DisplayName("Возвращает 403 если пользователь - не админ")
         void shouldReturn401WhenUnauthenticated() throws Exception {
             // Action && Check
-            performGetRequest(URI_TEMPLATE, CURRENT_USER)
+            performGetRequest(URI_TEMPLATE, TestUserDefaults.CURRENT_USER)
                     .andExpect(status().isForbidden());
         }
     }
@@ -258,11 +257,13 @@ class OrderControllerTest {
         void shouldReturn200AndPage() throws Exception {
             // Given
             final var request = PageRequest.of(0, 20);
-            final var order = TestOrderFactory.order(1L, ENTITY_ADMIN);
+            final var order = TestOrderFactory.order(1L,
+                            TestUserDefaults.ENTITY_ADMIN);
             when(orderService.findAllByUserId(any(), any()))
                     .thenReturn(new OrdersDTO(List.of(order)));
             // Action
-            performRequest(HttpMethod.GET, URI_TEMPLATE, request, CURRENT_USER)
+            performRequest(HttpMethod.GET, URI_TEMPLATE, request,
+                                    TestUserDefaults.CURRENT_USER)
                     // Check
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.orders[0].id").value(order.getId()))
@@ -283,7 +284,7 @@ class OrderControllerTest {
                         return null;
                     });
             // Action
-            performGetRequest(URI_TEMPLATE, CURRENT_USER);
+            performGetRequest(URI_TEMPLATE, TestUserDefaults.CURRENT_USER);
             // Check
             final var resultPageable = atomicPageable.get();
             assertThat(resultPageable.getPageSize()).isEqualTo(20);

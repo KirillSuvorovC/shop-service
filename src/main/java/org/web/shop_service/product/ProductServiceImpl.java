@@ -59,6 +59,11 @@ public class ProductServiceImpl implements ProductService {
         return ProductDTO.fromProduct(product);
     }
 
+    /**
+     * @throws EntityNotFoundException если продукт не найден
+     * @param id идентификатор заказа
+     * @return найденный продукт в виде {@link ProductDTO}
+     */
     @Override
     public ProductDTO getProductById(Long id) {
         final var product = getProductEntityById(id);
@@ -72,11 +77,22 @@ public class ProductServiceImpl implements ProductService {
         return new ProductsDTO(products);
     }
 
+    /**
+     * Вместо физического удаления архивизируем продукт,
+     * чтобы сохранить связи между таблицами.
+     * @param id идентификатор заказа
+     */
     @Override
+    @Transactional
     public void deleteProduct(Long id) {
-        repository.deleteById(id);
+        repository.markProductAsArchived(id);
     }
 
+    /**
+     * @throws EntityNotFoundException если продукт не найден
+     * @param id идентификатор заказа
+     * @return найденная сущность {@link Product}
+     */
     @Override
     public Product getProductEntityById(Long id) {
         return repository.findById(id)
