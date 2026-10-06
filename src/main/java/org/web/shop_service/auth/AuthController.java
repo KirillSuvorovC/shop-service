@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.web.shop_service.annotations.PublicEndPoint;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.utils.JwtUtils;
 
@@ -19,7 +18,6 @@ public class AuthController {
     private final JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    @PublicEndPoint
     @ResponseStatus(HttpStatus.OK)
     public void createAuthToken(@Valid @RequestBody JwtRequest request,
                                                     HttpServletResponse response) {
@@ -28,7 +26,6 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @PublicEndPoint
     @ResponseStatus(HttpStatus.CREATED)
     public void registerUser(@Valid @RequestBody UserRegisterRequest request,
                                                  HttpServletResponse response) {
