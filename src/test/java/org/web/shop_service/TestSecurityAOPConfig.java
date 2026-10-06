@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.web.shop_service.security.SecurityConfig;
+import org.web.shop_service.user.CurrentUserProvider;
 import org.web.shop_service.user.UserService;
+import org.web.shop_service.utils.JwtUtils;
 
 import static org.mockito.Mockito.mock;
 
@@ -25,5 +27,16 @@ public class TestSecurityAOPConfig {
     @Primary
     public UserService userService() {
         return mock(UserService.class);
+    }
+    @Bean
+    @Primary
+    public CurrentUserProvider currentUserProvider() {
+        return mock(CurrentUserProvider.class);
+    }
+
+    @Bean
+    @Primary
+    public JwtUtils jwtUtils() {
+        return new JwtUtils();
     }
 }

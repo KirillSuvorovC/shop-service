@@ -11,8 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.web.shop_service.user.CurrentUser;
-import org.web.shop_service.user.UserService;
+import org.web.shop_service.user.CurrentUserProvider;
 import org.web.shop_service.utils.JwtUtils;
 
 import java.io.IOException;
@@ -23,7 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
-    private final UserService service;
+    private final CurrentUserProvider provider;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -48,6 +48,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final List<SimpleGrantedAuthority> authorities;
         try {
             username = jwtUtils.getUsername(jwt);
+            // TODO: Позже убрать метод jwtUtils.getRoles(...), так как
+            // появилась замена: метод CurrentUserProvider.getByUsername(username),
+            // при этом возвращает CurrentUser и там уже есть поле authorities
             authorities = jwtUtils.getRoles(jwt)
                                             .stream()
                                             .map(SimpleGrantedAuthority::new)
@@ -57,9 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            final var user = service.getUserByUsername(username);
+            final var user = provider.getByUsername(username);
             final var token = new UsernamePasswordAuthenticationToken(
-                    new CurrentUser(user), null, authorities);
+                    user,null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(token);
         }
         filterChain.doFilter(request, response);
