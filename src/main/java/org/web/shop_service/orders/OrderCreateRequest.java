@@ -1,23 +1,29 @@
 package org.web.shop_service.orders;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+@Schema(description = "Запрос на создание заказа")
 public record OrderCreateRequest(
         @NotEmpty(message = INVALID_ORDER_ITEMS)
         @Size(min = 1, max = 10, message = INVALID_ORDER_ITEMS)
         @Valid
+        @Schema(description = "Список позиций заказа")
         Item[] items
 )
 {
-    public static record Item(
+    @Schema(title = "OrderCreateRequest.Item")
+    public record Item(
             @NotNull(message = EMPTY_PRODUCT_ID)
+            @Schema(description = "ID продукта", example = "1")
             Long productId,
             @NotNull(message = EMPTY_AMOUNT)
             @Positive(message = INVALID_AMOUNT)
+            @Schema(description = "Количество продукта", example = "1", minimum = "1")
             Integer amount) {
 
     }
