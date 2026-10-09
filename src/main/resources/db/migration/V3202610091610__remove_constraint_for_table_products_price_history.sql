@@ -1,0 +1,1 @@
+alter table products_price_history drop constraint products_price_history_updated_at_check;
