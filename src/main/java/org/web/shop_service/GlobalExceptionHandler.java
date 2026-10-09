@@ -33,17 +33,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({ValidationException.class, InvalidRequestException.class})
     public ResponseEntity<ResponseError> badRequest(Exception e) {
-        return ResponseError.asEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseError.asEntity(HttpStatus.BAD_REQUEST,
+                message(e, "Invalid Request"));
     }
 
     @ExceptionHandler({EntityNotFoundException.class, UsernameNotFoundException.class})
     public ResponseEntity<ResponseError> notFound(Exception e) {
-        return ResponseError.asEntity(HttpStatus.NOT_FOUND, e.getMessage());
+        return ResponseError.asEntity(HttpStatus.NOT_FOUND,
+                message(e, "Not found"));
     }
 
     @ExceptionHandler({UserAlreadyExistsException.class, OptimisticLockingFailureException.class})
     public ResponseEntity<ResponseError> conflict(Exception e) {
-        return ResponseError.asEntity(HttpStatus.CONFLICT, e.getMessage());
+        return ResponseError.asEntity(HttpStatus.CONFLICT,
+                message(e, "Conflict"));
     }
 
     @ExceptionHandler(OptimisticLockException.class)
@@ -55,5 +58,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseError> preconditionFailed() {
         return ResponseError.asEntity(HttpStatus.PRECONDITION_FAILED,
                 "HTTP-Header If-Match is required");
+    }
+
+    private String message(Exception e, String defaultMessage) {
+        final String message = e.getMessage();
+        return message == null ? defaultMessage : message;
     }
 }
