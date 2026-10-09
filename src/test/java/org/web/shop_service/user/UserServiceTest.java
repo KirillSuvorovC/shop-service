@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
 import org.web.shop_service.role.Role;
 import org.web.shop_service.role.RoleService;
 
@@ -20,9 +21,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Юнит-тесты отсутствуют для методов {@link UserService#findByUsername(String)}
- * и {@link UserService#existsByUsername(String)}.
- * Причина: простая делегация методов класса {@link UserRepository}
+ * Юнит-тесты отсутствуют для метода {@link UserService#existsByUsername(String)}.
+ * Причина: простая делегация метода класса {@link UserRepository}
  */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -36,29 +36,43 @@ class UserServiceTest {
     private BCryptPasswordEncoder encoder;
     @InjectMocks
     private UserService userService;
-
-    @Test
-    @DisplayName("Должен успешно создать пользователя и вернуть его детали")
-    void createUser_shouldReturnUserDetails() {
-        // Given
-        final String encodedPassword = "encodedPassword";
-        final var request = new UserRegisterRequest(
-                DEFAULT_USERNAME, DEFAULT_PASSWORD, DEFAULT_PASSWORD);
-        when(roleService.getRoleByName(Role.ROLE_USER)).thenReturn(new Role(Role.ROLE_USER));
-        when(encoder.encode(DEFAULT_PASSWORD)).thenReturn(encodedPassword);
-        // Action
-        final var userDetails = userService.createUser(request);
-        final var authority = userDetails.getAuthorities()
-                                         .stream()
-                                         .map(GrantedAuthority::getAuthority)
-                                         .findFirst();
-        // Check
-        assertNotNull(userDetails);
-        assertNotNull(authority);
-        verify(encoder, times(1)).encode(DEFAULT_PASSWORD);
-        assertEquals(DEFAULT_USERNAME, userDetails.getUsername());
-        assertEquals(encodedPassword, userDetails.getPassword());
-        assertEquals(Role.ROLE_USER, authority.get());
+    @Nested
+    @DisplayName("Загрузка пользователя по имени")
+    class CreateUser {
+        @Test
+        @DisplayName("Должен успешно создать пользователя и вернуть его детали")
+        void shouldReturnUserDetails() {
+            // Given
+            final String encodedPassword = "encodedPassword";
+            final var request = new UserRegisterRequest(
+                    DEFAULT_USERNAME, DEFAULT_PASSWORD, DEFAULT_PASSWORD);
+            when(repository.existsByUsername(DEFAULT_USERNAME)).thenReturn(false);
+            when(roleService.getRoleByName(Role.ROLE_USER)).thenReturn(new Role(Role.ROLE_USER));
+            when(encoder.encode(DEFAULT_PASSWORD)).thenReturn(encodedPassword);
+            // Action
+            final var userDetails = userService.createUser(request);
+            final var authority = userDetails.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst();
+            // Check
+            assertNotNull(userDetails);
+            assertNotNull(authority);
+            verify(encoder, times(1)).encode(DEFAULT_PASSWORD);
+            assertEquals(DEFAULT_USERNAME, userDetails.getUsername());
+            assertEquals(encodedPassword, userDetails.getPassword());
+            assertEquals(Role.ROLE_USER, authority.get());
+        }
+        @Test
+        @DisplayName("Если пользователь существует - бросить исключение")
+        void whenUserExists_throwException() {
+            // Given
+            final var request = new UserRegisterRequest(
+                    DEFAULT_USERNAME, DEFAULT_PASSWORD, DEFAULT_PASSWORD);
+            when(repository.existsByUsername(DEFAULT_USERNAME)).thenReturn(true);
+            // Action && Check
+            assertThrows(UserAlreadyExistsException.class, () -> userService.createUser(request));
+        }
     }
 
     @Nested

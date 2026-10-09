@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
 import org.web.shop_service.role.Role;
 import org.web.shop_service.role.RoleService;
 
@@ -31,10 +32,6 @@ public class UserService implements UserDetailsService {
         final var authorities = List.of(new SimpleGrantedAuthority(user.getRole().getName()));
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(), user.getPassword(), authorities);
-    }
-
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsernameWithRole(username);
     }
 
     public boolean existsByUsername(String username) {
@@ -61,7 +58,18 @@ public class UserService implements UserDetailsService {
                         "user not found with id " + id));
     }
 
+    /**
+     * Создает пользователя, хэширует пароль и сохраняет в БД.
+     * @param request - данные для создания пользователя
+     * @throws UserAlreadyExistsException если пользователь существует
+     *         с таким именем в БД
+     * @return созданного пользователя в виде {@link UserDetails}
+ *             с ролью {@link Role#ROLE_USER}
+     */
     public UserDetails createUser(UserRegisterRequest request) {
+        if(userRepository.existsByUsername(request.username())) {
+            throw new UserAlreadyExistsException(request.username());
+        }
         final var newUser = new User();
         newUser.setUsername(request.username());
         newUser.setPassword(passwordEncoder.encode(request.password()));

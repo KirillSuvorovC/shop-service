@@ -54,7 +54,6 @@ class AuthServiceImplTest {
                     password,
                     List.of(new SimpleGrantedAuthority(Role.ROLE_USER)));
 
-            when(userService.existsByUsername(username)).thenReturn(false);
             when(userService.createUser(request)).thenReturn(userDetails);
             when(jwtUtils.generateToken(userDetails)).thenReturn(jwt);
             // Action
@@ -84,7 +83,7 @@ class AuthServiceImplTest {
             final String username = "username";
             final String password = "password";
             final var request = new UserRegisterRequest(username, password, password);
-            when(userService.existsByUsername(username)).thenReturn(true);
+            when(userService.createUser(request)).thenThrow(UserAlreadyExistsException.class);
             // Action && Check
             assertThrows(UserAlreadyExistsException.class, () -> authService.registerUser(request));
         }
