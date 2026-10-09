@@ -20,6 +20,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductPatchValidator validator;
     private final ProductRabbitMQProperties productProperties;
     private final OutboxService outboxService;
+    private final VersionHelper versionHelper;
 
     @Override
     @Transactional
@@ -37,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDTO updateProduct(Long id, ProductUpdateRequest request) {
         final var product = getProductEntityById(id);
+        versionHelper.checkVersion(request.getVersion(), product.getVersion());
         product.setName(request.getName());
         product.setPrice(request.getPrice());
         repository.saveAndFlush(product);
@@ -48,8 +50,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDTO patchProduct(Long id, ProductPatchRequest request) {
         final var product = getProductEntityById(id);
+        versionHelper.checkVersion(request.getVersion(), product.getVersion());
         validator.validate(request);
-        VersionHelper.check(request.getVersion(), product.getVersion());
         if(request.getName() != null) product.setName(request.getName());
         if(request.getPrice() != null) product.setPrice(request.getPrice());
         repository.saveAndFlush(product);
