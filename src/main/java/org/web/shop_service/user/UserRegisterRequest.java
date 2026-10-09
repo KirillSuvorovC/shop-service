@@ -4,22 +4,28 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-// TODO: вынести захардкоженные значения в константы
+import static org.web.shop_service.user.UserConstants.*;
+
 @Schema(description = "Запрос на регистрацию")
 public record UserRegisterRequest(
-        @Size(min = 3, max = 100, message = "username must be 3–100 characters long")
+        @Size(min = USERNAME_MIN_SIZE,
+              max = USERNAME_MAX_SIZE,
+              message = INVALID_USERNAME_SIZE)
         @NotBlank(message = "username must not be empty")
-        @Schema(description = "Имя пользователя", example = "User",
-                minimum = "3", maximum = "100")
+        @Schema(description = "Имя пользователя", example = "User")
         String username,
-        @Size(min = 6, max = 100, message = "password must be 6–100 characters long")
+
+        @Size(min = PASSWORD_MIN_SIZE,
+              max = PASSWORD_MAX_SIZE,
+              message = INVALID_PASSWORD_SIZE)
         @NotBlank(message = "password must not be empty")
-        @Schema(description = "Пароль", example = "password",
-                minimum = "6", maximum = "100")
+        @Schema(description = "Пароль", example = "password")
         String password,
-        @Size(min = 6, max = 100, message = "password must be 6–100 characters long")
+
+        @Size(min = PASSWORD_MIN_SIZE,
+              max = PASSWORD_MAX_SIZE,
+              message = INVALID_PASSWORD_SIZE)
         @NotBlank(message = "password must not be empty")
-        @Schema(description = "Подтверждение пароля", example = "password",
-                minimum = "6", maximum = "100")
+        @Schema(description = "Подтверждение пароля", example = "password")
         String confirmPassword) {
 }
