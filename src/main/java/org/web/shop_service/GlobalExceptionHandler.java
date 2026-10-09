@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
 import org.web.shop_service.utils.ResponseError;
 import org.web.shop_service.utils.exceptions.HttpHeaderIfMatchRequiredException;
 import org.web.shop_service.utils.exceptions.InvalidRequestException;
@@ -40,8 +41,8 @@ public class GlobalExceptionHandler {
         return ResponseError.asEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
-    @ExceptionHandler(OptimisticLockingFailureException.class)
-    public ResponseEntity<ResponseError> conflict(OptimisticLockingFailureException e) {
+    @ExceptionHandler({UserAlreadyExistsException.class, OptimisticLockingFailureException.class})
+    public ResponseEntity<ResponseError> conflict(Exception e) {
         return ResponseError.asEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 

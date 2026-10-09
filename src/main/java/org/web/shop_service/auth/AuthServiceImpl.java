@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
 import org.web.shop_service.user.User;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.user.UserService;
@@ -41,8 +42,7 @@ public class AuthServiceImpl implements AuthService {
         }
         final Optional<User> user = userService.findByUsername(request.username());
         if(user.isPresent()) {
-            throw new InvalidRequestException("user already exists with username "
-                    + request.username());
+            throw new UserAlreadyExistsException(request.username());
         }
         final var userDetails = userService.createUser(request);
         final String token = jwtUtils.generateToken(userDetails);

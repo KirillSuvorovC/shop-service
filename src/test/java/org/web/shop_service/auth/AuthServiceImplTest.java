@@ -1,13 +1,18 @@
 package org.web.shop_service.auth;
 
+import jakarta.validation.ValidationException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
 import org.web.shop_service.user.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.web.shop_service.role.Role;
@@ -33,80 +38,104 @@ class AuthServiceImplTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
-    @Test
-    void registerUser_shouldReturnJwt() {
-        // Given
-        final String username = "username";
-        final String password = "password";
-        final String jwt = "JsonWebToken";
-        final var request = new UserRegisterRequest(username, password, password);
-        final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                username,
-                password,
-                List.of(new SimpleGrantedAuthority(Role.ROLE_USER)));
+    @Nested
+    @DisplayName("Регистрация")
+    class RegisterUser {
+        @Test
+        @DisplayName("Создать пользователя и вернуть JWT")
+        void shouldCreateUserAndReturnJwt() {
+            // Given
+            final String username = "username";
+            final String password = "password";
+            final String jwt = "JsonWebToken";
+            final var request = new UserRegisterRequest(username, password, password);
+            final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                    username,
+                    password,
+                    List.of(new SimpleGrantedAuthority(Role.ROLE_USER)));
 
-        when(userService.findByUsername(any())).thenReturn(Optional.empty());
-        when(userService.createUser(any())).thenReturn(userDetails);
-        when(jwtUtils.generateToken(any())).thenReturn(jwt);
-        // Action
-        final var response = authService.registerUser(request);
+            when(userService.findByUsername(any())).thenReturn(Optional.empty());
+            when(userService.createUser(any())).thenReturn(userDetails);
+            when(jwtUtils.generateToken(any())).thenReturn(jwt);
+            // Action
+            final var response = authService.registerUser(request);
 
-        // Check
-        assertNotNull(response);
-        assertEquals(jwt, response.token());
+            // Check
+            assertNotNull(response);
+            assertEquals(jwt, response.token());
+        }
+
+        @Test
+        @DisplayName("Бросить исключение, если пароли не совпадают")
+        void whenPasswordsNotMatch_throwException() {
+            // Given
+            final String username = "username";
+            final String password = "password";
+            final String confirmPassword = "confirmPassword";
+            final var request = new UserRegisterRequest(username, password, confirmPassword);
+            // Action && Check
+            assertThrows(InvalidRequestException.class, () -> authService.registerUser(request));
+        }
+
+        @Test
+        @DisplayName("Бросить исключение, если пользователь уже существует")
+        void whenUserAlreadyExists_throwException() {
+            // Given
+            final String username = "username";
+            final String password = "password";
+            final var request = new UserRegisterRequest(username, password, password);
+            when(userService.findByUsername(any())).thenReturn(Optional.of(new User()));
+            // Action && Check
+            assertThrows(UserAlreadyExistsException.class, () -> authService.registerUser(request));
+        }
     }
 
-    @Test
-    void registerUser_whenPasswordsNotMatch_throwException() {
-        // Given
-        final String username = "username";
-        final String password = "password";
-        final String confirmPassword = "confirmPassword";
-        final var request = new UserRegisterRequest(username, password, confirmPassword);
-        // Action && Check
-        assertThrows(InvalidRequestException.class, () -> authService.registerUser(request));
-    }
+    @Nested
+    @DisplayName("Аутентификация")
+    class CreateAuthToken {
+        @Test
+        @DisplayName("Вернуть JWT")
+        void shouldReturnJwt() {
+            // Given
+            final String username = "username";
+            final String password = "password";
+            final String jwt = "JsonWebToken";
+            final var request = new JwtRequest(username, password);
+            final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                    username,
+                    password,
+                    List.of(new SimpleGrantedAuthority(Role.ROLE_USER)));
 
-    @Test
-    void registerUser_whenUserAlreadyExists_throwException() {
-        // Given
-        final String username = "username";
-        final String password = "password";
-        final var request = new UserRegisterRequest(username, password, password);
-        when(userService.findByUsername(any())).thenReturn(Optional.of(new User()));
-        // Action && Check
-        assertThrows(InvalidRequestException.class, () -> authService.registerUser(request));
-    }
+            when(userService.loadUserByUsername(any())).thenReturn(userDetails);
+            when(jwtUtils.generateToken(any())).thenReturn(jwt);
 
-    @Test
-    void createAuthToken_shouldReturnJwt() {
-        // Given
-        final String username = "username";
-        final String password = "password";
-        final String jwt = "JsonWebToken";
-        final var request = new JwtRequest(username, password);
-        final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                username,
-                password,
-                List.of(new SimpleGrantedAuthority(Role.ROLE_USER)));
+            // Action
+            final var response = authService.createAuthToken(request);
+            // Check
+            assertNotNull(response);
+            assertEquals(jwt, response.token());
+        }
 
-        when(userService.loadUserByUsername(any())).thenReturn(userDetails);
-        when(jwtUtils.generateToken(any())).thenReturn(jwt);
+        @Test
+        @DisplayName("Бросить исключение, если пользователь не найден")
+        void whenUserServiceThrowException_rethrow() {
+            // Given
+            final var request = new JwtRequest("unknown", "password");
+            when(userService.loadUserByUsername(any())).thenThrow(UsernameNotFoundException.class);
 
-        // Action
-        final var response = authService.createAuthToken(request);
-        // Check
-        assertNotNull(response);
-        assertEquals(jwt, response.token());
-    }
+            // Action && Check
+            assertThrows(UsernameNotFoundException.class, () -> authService.createAuthToken(request));
+        }
 
-    @Test
-    void createAuthToken_whenUserServiceThrowException_rethrow() {
-        // Given
-        final var request = new JwtRequest("unknown", "password");
-        when(userService.loadUserByUsername(any())).thenThrow(UsernameNotFoundException.class);
+        @Test
+        @DisplayName("Бросить исключение, если неправильный логин или пароль")
+        void whenInvalidLoginOrPassword_throwException() {
+            // Given
+            final var request = new JwtRequest("unknown", "password");
+            when(authenticationManager.authenticate(any())).thenThrow(BadCredentialsException.class);
 
-        // Action && Check
-        assertThrows(UsernameNotFoundException.class, () -> authService.createAuthToken(request));
+            // Action && Check
+            assertThrows(ValidationException.class, () -> authService.createAuthToken(request));
+        }
     }
 }

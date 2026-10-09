@@ -5,14 +5,12 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.utils.JwtUtils;
@@ -50,10 +48,9 @@ public class AuthController {
             @ApiResponse(responseCode = "201", description = "Успешная регистрация",
                     headers = @Header(name = "Set-Cookie", description = "JWT cookie",
                     schema = @Schema(type = "string", example = "token=eyJ...; Path=/; HttpOnly"))),
-            @ApiResponse(responseCode = "400", description = """
-                    Пароли не совпадают или пользователь
-                    с таким именем уже существует
-                    """)
+            @ApiResponse(responseCode = "400", description = "Пароли не совпадают"),
+            @ApiResponse(responseCode = "409",
+                    description = "Пользователь с таким именем уже существует"),
     })
     public void registerUser(@Valid @RequestBody UserRegisterRequest request,
                                                  HttpServletResponse response) {
