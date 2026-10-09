@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.web.shop_service.utils.ResponseError;
 import org.web.shop_service.utils.exceptions.EntityNotFoundException;
+import org.web.shop_service.utils.exceptions.HttpHeaderIfMatchRequiredException;
 import org.web.shop_service.utils.exceptions.InvalidRequestException;
 
 import java.util.stream.Collectors;
@@ -30,21 +31,28 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({ValidationException.class, InvalidRequestException.class})
-    public ResponseEntity<ResponseError> handleBadRequest(Exception e) {
+    public ResponseEntity<ResponseError> badRequest(Exception e) {
         return ResponseError.asEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler({EntityNotFoundException.class, UsernameNotFoundException.class})
-    public ResponseEntity<ResponseError> handleNotFound(Exception e) {
+    public ResponseEntity<ResponseError> notFound(Exception e) {
         return ResponseError.asEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
-    public ResponseEntity<ResponseError> handleConflict(OptimisticLockingFailureException e) {
+    public ResponseEntity<ResponseError> conflict(OptimisticLockingFailureException e) {
         return ResponseError.asEntity(HttpStatus.CONFLICT, e.getMessage());
     }
+
     @ExceptionHandler(OptimisticLockException.class)
-    public ResponseEntity<ResponseError> handleConflict() {
+    public ResponseEntity<ResponseError> conflict() {
         return ResponseError.asEntity(HttpStatus.CONFLICT, "Data is old, reload page");
+    }
+
+    @ExceptionHandler(HttpHeaderIfMatchRequiredException.class)
+    public ResponseEntity<ResponseError> preconditionFailed() {
+        return ResponseError.asEntity(HttpStatus.PRECONDITION_FAILED,
+                "HTTP-Header If-Match is required");
     }
 }

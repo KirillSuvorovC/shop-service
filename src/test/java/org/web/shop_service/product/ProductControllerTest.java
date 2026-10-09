@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -86,7 +87,8 @@ class ProductControllerTest {
         // Action && Check
         final var resultActions = mockMvc.perform(put("/api/products/1")
                 .contentType(APPLICATION_JSON)
-                .content(requestJson));
+                .content(requestJson)
+                .header(HttpHeaders.IF_MATCH, "1"));
         expectProduct(resultActions, HttpStatus.OK, product);
     }
 
@@ -101,7 +103,8 @@ class ProductControllerTest {
         // Action && Check
         final var resultActions = mockMvc.perform(put("/api/products/1")
                 .contentType(APPLICATION_JSON)
-                .content(asJson(request)));
+                .content(asJson(request))
+                .header(HttpHeaders.IF_MATCH, "1"));
         expectError(resultActions, HttpStatus.BAD_REQUEST);
     }
 
@@ -117,7 +120,8 @@ class ProductControllerTest {
         // Action && Check
         final var resultActions = mockMvc.perform(put("/api/products/1")
                 .contentType(APPLICATION_JSON)
-                .content(asJson(request)));
+                .content(asJson(request))
+                .header(HttpHeaders.IF_MATCH, "1"));
         expectError(resultActions, HttpStatus.CONFLICT);
     }
 
@@ -136,7 +140,8 @@ class ProductControllerTest {
         // Action && Check
         var resultActions = mockMvc.perform(patch("/api/products/1")
                 .contentType(APPLICATION_JSON)
-                .content(requestJson));
+                .content(requestJson)
+                .header(HttpHeaders.IF_MATCH, "1"));
         expectProduct(resultActions, HttpStatus.OK, product);
     }
 
@@ -151,7 +156,8 @@ class ProductControllerTest {
         // Action && Check
         final var resultActions = mockMvc.perform(patch("/api/products/1")
                 .contentType(APPLICATION_JSON)
-                .content(asJson(request)));
+                .content(asJson(request))
+                .header(HttpHeaders.IF_MATCH, "1"));
         expectError(resultActions, HttpStatus.BAD_REQUEST);
     }
 

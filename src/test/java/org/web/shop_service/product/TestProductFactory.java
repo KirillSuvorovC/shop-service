@@ -13,6 +13,7 @@ public class TestProductFactory {
         product.setName("Product " + id);
         product.setCreatedAt(ZonedDateTime.now(ZoneOffset.UTC));
         product.setPrice(new BigDecimal("50.00"));
+        product.setVersion(1L);
         return product;
     }
 

@@ -8,6 +8,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 import org.web.shop_service.utils.VersionedRequest;
+import org.web.shop_service.utils.exceptions.HttpHeaderIfMatchRequiredException;
 
 import java.lang.reflect.Type;
 
@@ -28,8 +29,11 @@ public class GlobalRequestBodyHandler extends RequestBodyAdviceAdapter {
                                 Type targetType,
                                 Class<? extends HttpMessageConverter<?>> converterType) {
         final var headers = inputMessage.getHeaders();
-        final String ifMatch = headers.getFirst(HttpHeaders.IF_MATCH);
-        if (ifMatch != null && body instanceof VersionedRequest request) {
+        if (body instanceof VersionedRequest request) {
+            final String ifMatch = headers.getFirst(HttpHeaders.IF_MATCH);
+            if(ifMatch == null || ifMatch.isBlank())
+                throw new HttpHeaderIfMatchRequiredException();
+
             final Long version = Long.parseLong(
                     ifMatch.replace("\"", ""));
             request.setVersion(version);

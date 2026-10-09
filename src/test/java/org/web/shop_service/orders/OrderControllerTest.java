@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -137,10 +138,12 @@ class OrderControllerTest {
             final var order = TestOrderFactory.order(1L,
                             TestUserDefaults.ENTITY_ADMIN);
             order.setStatus(OrderStatus.CANCELLED);
+            final String orderVersion = order.getVersion().toString();
             when(orderService.updateStatus(anyLong(), any())).thenReturn(new OrderDTO(order));
             // Action
-            performRequest(HttpMethod.PUT, URI_TEMPLATE, request,
-                           TestUserDefaults.CURRENT_ADMIN)
+            performRequestWithIfMatch(request,
+                                      TestUserDefaults.CURRENT_ADMIN,
+                                      orderVersion)
                     // Check
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(1))
@@ -153,9 +156,9 @@ class OrderControllerTest {
             // Given
             final var request = new OrderUpdateStatusRequest("unknown");
             // Action && Check
-            final var resultActions = performRequest(HttpMethod.PUT, URI_TEMPLATE,
-                                                     request,
-                                                     TestUserDefaults.CURRENT_ADMIN);
+            final var resultActions = performRequestWithIfMatch(request,
+                                        TestUserDefaults.CURRENT_ADMIN,
+                                        "1");
             checkError(resultActions, HttpStatus.BAD_REQUEST);
         }
 
@@ -167,9 +170,9 @@ class OrderControllerTest {
             when(orderService.updateStatus(anyLong(), any()))
                     .thenThrow(new EntityNotFoundException("Order not found"));
             // Action && Check
-            final var resultActions = performRequest(HttpMethod.PUT, URI_TEMPLATE,
-                                                     request,
-                                                     TestUserDefaults.CURRENT_ADMIN);
+            final var resultActions = performRequestWithIfMatch(request,
+                                        TestUserDefaults.CURRENT_ADMIN,
+                                        "1");
             checkError(resultActions, HttpStatus.NOT_FOUND);
         }
 
@@ -181,9 +184,9 @@ class OrderControllerTest {
             when(orderService.updateStatus(anyLong(), any()))
                     .thenThrow(new OptimisticLockingFailureException("Data old, reload page"));
             // Action && Check
-            final var resultActions = performRequest(HttpMethod.PUT, URI_TEMPLATE,
-                                                     request,
-                                                     TestUserDefaults.CURRENT_ADMIN);
+            final var resultActions = performRequestWithIfMatch(request,
+                                        TestUserDefaults.CURRENT_ADMIN,
+                                        "1");
             checkError(resultActions, HttpStatus.CONFLICT);
         }
 
@@ -193,13 +196,26 @@ class OrderControllerTest {
             // Given
             final var request = createRequest();
             // Action && Check
-            performRequest(HttpMethod.PUT, URI_TEMPLATE, request,
-                    TestUserDefaults.CURRENT_USER)
+            performRequestWithIfMatch(request,
+                    TestUserDefaults.CURRENT_USER,
+                    "1")
                     .andExpect(status().isForbidden());
         }
 
         private static OrderUpdateStatusRequest createRequest() {
             return new OrderUpdateStatusRequest(OrderStatus.CANCELLED.name());
+        }
+
+        private ResultActions performRequestWithIfMatch(Object requestBody,
+                                                        CurrentUser authUser,
+                                                        String ifMatch)
+                                                        throws Exception {
+            return mockMvc.perform(put(URI_TEMPLATE)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(JsonUtils.asJson(requestBody))
+                    .header(HttpHeaders.IF_MATCH, ifMatch)
+                    .with(csrf())
+                    .with(user(authUser)));
         }
     }
 
