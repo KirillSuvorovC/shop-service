@@ -40,8 +40,7 @@ public class AuthServiceImpl implements AuthService {
         if(!StringUtils.equals(request.password(), request.confirmPassword())) {
             throw new InvalidRequestException("passwords do not match");
         }
-        final Optional<User> user = userService.findByUsername(request.username());
-        if(user.isPresent()) {
+        if(userService.existsByUsername(request.username())) {
             throw new UserAlreadyExistsException(request.username());
         }
         final var userDetails = userService.createUser(request);

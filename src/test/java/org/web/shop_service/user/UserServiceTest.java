@@ -20,8 +20,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Юнит-тесты отсутствуют для метода {@link UserService#findByUsername(String)}.
- * Причина: простая делегация {@link UserRepository#findByUsername(String)}
+ * Юнит-тесты отсутствуют для методов {@link UserService#findByUsername(String)}
+ * и {@link UserService#existsByUsername(String)}.
+ * Причина: простая делегация методов класса {@link UserRepository}
  */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -68,7 +69,7 @@ class UserServiceTest {
         void shouldReturnUserDetails() {
             // Given
             final var user = createUser();
-            when(repository.findByUsername(any())).thenReturn(Optional.of(user));
+            when(repository.findByUsernameWithRole(any())).thenReturn(Optional.of(user));
             // Action
             final var userDetails = userService.loadUserByUsername(DEFAULT_USERNAME);
             final var authority = userDetails.getAuthorities()
@@ -88,7 +89,7 @@ class UserServiceTest {
         @DisplayName("Если пользователь не найден - бросить исключение")
         void whenUserNotFound_ThrowException() {
             // Given
-            when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.empty());
+            when(repository.findByUsernameWithRole(DEFAULT_USERNAME)).thenReturn(Optional.empty());
             // Action && Check
             assertThrows(UsernameNotFoundException.class,
                     () -> userService.loadUserByUsername(DEFAULT_USERNAME));
@@ -103,7 +104,7 @@ class UserServiceTest {
         void shouldReturnUserByUsername() {
             // Given
             final var user = createUser();
-            when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.of(user));
+            when(repository.findByUsernameWithRole(DEFAULT_USERNAME)).thenReturn(Optional.of(user));
             // Action
             final User result = userService.getUserByUsername(DEFAULT_USERNAME);
             // Check
@@ -118,7 +119,7 @@ class UserServiceTest {
         @DisplayName("Если пользователь по имени не найден - бросить исключение")
         void whenUserNotFoundByUsername_ThrowException() {
             // Given
-            when(repository.findByUsername(DEFAULT_USERNAME)).thenReturn(Optional.empty());
+            when(repository.findByUsernameWithRole(DEFAULT_USERNAME)).thenReturn(Optional.empty());
             // Action && Check
             assertThrows(UsernameNotFoundException.class,
                     () -> userService.getUserByUsername(DEFAULT_USERNAME));

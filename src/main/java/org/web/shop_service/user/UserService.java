@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-// TODO: добавить индекс для колонки таблицы users.username
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -35,7 +34,11 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsernameWithRole(username);
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
     /**
@@ -43,7 +46,7 @@ public class UserService implements UserDetailsService {
      * @return найденный {@link User}
      */
     public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameWithRole(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "user not found with username " + username));
     }

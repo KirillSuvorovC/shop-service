@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.web.shop_service.role.Role;
 
-import java.util.Collection;
-
 @Getter
 @Setter
 @Entity
@@ -14,12 +12,12 @@ import java.util.Collection;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false, unique = true)
     private Long id;
     private String username;
     private String password;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
 }
