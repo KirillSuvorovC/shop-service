@@ -1,5 +1,6 @@
 package org.web.shop_service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ValidationException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.web.shop_service.utils.ResponseError;
-import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 import org.web.shop_service.utils.exceptions.HttpHeaderIfMatchRequiredException;
 import org.web.shop_service.utils.exceptions.InvalidRequestException;
 

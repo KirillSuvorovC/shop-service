@@ -1,5 +1,6 @@
 package org.web.shop_service.orders;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -11,7 +12,6 @@ import org.web.shop_service.user.CurrentUser;
 import org.web.shop_service.user.User;
 import org.web.shop_service.user.UserService;
 import org.web.shop_service.utils.VersionHelper;
-import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.util.ArrayList;
 
@@ -92,6 +92,7 @@ public class OrderServiceImpl implements OrderService {
 
     private Order getOrderEntityById(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found with id " + id));
+                .orElseThrow(() -> new EntityNotFoundException(
+                            "Order not found with id " + id));
     }
 }

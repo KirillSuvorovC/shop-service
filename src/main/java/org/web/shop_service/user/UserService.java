@@ -1,5 +1,6 @@
 package org.web.shop_service.user;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -7,10 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.web.shop_service.role.Role;
 import org.web.shop_service.role.RoleService;
-import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.util.List;
 import java.util.Optional;

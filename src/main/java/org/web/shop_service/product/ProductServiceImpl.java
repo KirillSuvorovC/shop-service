@@ -1,5 +1,6 @@
 package org.web.shop_service.product;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -8,7 +9,6 @@ import org.web.shop_service.outbox.OutboxService;
 import org.web.shop_service.product.events.ProductPriceChangedEvent;
 import org.web.shop_service.product.rabbitmq.ProductRabbitMQProperties;
 import org.web.shop_service.utils.VersionHelper;
-import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -96,7 +96,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductEntityById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Product.class));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Product not found with id: " + id));
     }
 
     private void publishEvent(Product product, ZonedDateTime updatedAt) {

@@ -1,5 +1,6 @@
 package org.web.shop_service.orders;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.web.shop_service.product.Product;
 import org.web.shop_service.product.ProductService;
@@ -18,7 +18,6 @@ import org.web.shop_service.user.TestUserFactory;
 import org.web.shop_service.user.User;
 import org.web.shop_service.user.UserService;
 import org.web.shop_service.utils.VersionHelper;
-import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.util.List;
 import java.util.Optional;

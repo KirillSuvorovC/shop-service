@@ -1,5 +1,6 @@
 package org.web.shop_service.orders;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,6 @@ import org.web.shop_service.TestSecurityAOPConfig;
 import org.web.shop_service.TestUserDefaults;
 import org.web.shop_service.user.CurrentUser;
 import org.web.shop_service.utils.JsonUtils;
-import org.web.shop_service.utils.exceptions.EntityNotFoundException;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
