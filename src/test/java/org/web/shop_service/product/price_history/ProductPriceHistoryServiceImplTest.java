@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.web.shop_service.product.ProductService;
-import org.web.shop_service.product.TestProductFactory;
+import org.web.shop_service.product.support.TestProductFactory;
 import org.web.shop_service.product.events.ProductPriceChangedEvent;
 
 import java.time.ZoneOffset;

@@ -1,14 +1,14 @@
-package org.web.shop_service;
+package org.web.shop_service.support;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.web.shop_service.GlobalExceptionHandler;
 import org.web.shop_service.auth.JwtRequest;
 import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
 import org.web.shop_service.utils.exceptions.HttpHeaderIfMatchRequiredException;

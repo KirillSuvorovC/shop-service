@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.web.shop_service.outbox.OutboxService;
 import org.web.shop_service.product.rabbitmq.ProductRabbitMQProperties;
+import org.web.shop_service.product.support.TestProductFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

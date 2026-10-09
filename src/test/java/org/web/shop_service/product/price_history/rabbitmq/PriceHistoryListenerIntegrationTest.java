@@ -3,24 +3,18 @@ package org.web.shop_service.product.price_history.rabbitmq;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.test.TestRabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.web.shop_service.TestContainersFactory;
-import org.web.shop_service.TestRabbitMQConfig;
-import org.web.shop_service.outbox.Event;
+import org.web.shop_service.support.TestContainersFactory;
+import org.web.shop_service.support.configs.TestRabbitMQConfig;
 import org.web.shop_service.outbox.publishbox.PublishBoxRepository;
 import org.web.shop_service.outbox.publishbox.PublishBoxService;
 import org.web.shop_service.product.ProductRepository;
@@ -35,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Testcontainers

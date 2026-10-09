@@ -14,6 +14,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.web.shop_service.auth.JwtRequest;
+import org.web.shop_service.support.TestExceptionController;
+import org.web.shop_service.support.configs.TestSecurityAOPConfig;
 import org.web.shop_service.utils.JsonUtils;
 
 import java.util.stream.Stream;

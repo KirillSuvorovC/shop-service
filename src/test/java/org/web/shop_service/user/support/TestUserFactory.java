@@ -1,7 +1,9 @@
-package org.web.shop_service.user;
+package org.web.shop_service.user.support;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.web.shop_service.role.Role;
+import org.web.shop_service.user.CurrentUser;
+import org.web.shop_service.user.User;
 
 import java.util.List;
 

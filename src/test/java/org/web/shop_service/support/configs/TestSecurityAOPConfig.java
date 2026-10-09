@@ -1,4 +1,4 @@
-package org.web.shop_service;
+package org.web.shop_service.support.configs;
 
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.web.shop_service.TestContainersFactory;
+import org.web.shop_service.support.TestContainersFactory;
 
 import java.util.UUID;
 

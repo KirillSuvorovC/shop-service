@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.web.shop_service.TestContainersFactory;
-import org.web.shop_service.TestRabbitMQConfig;
+import org.web.shop_service.support.TestContainersFactory;
+import org.web.shop_service.support.configs.TestRabbitMQConfig;
 import org.web.shop_service.utils.JsonUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.web.shop_service.product.ProductController;
 import org.web.shop_service.product.ProductCreateRequest;
 import org.web.shop_service.product.ProductService;
+import org.web.shop_service.support.configs.TestSecurityAOPConfig;
 import org.web.shop_service.utils.JsonUtils;
 
 import java.math.BigDecimal;

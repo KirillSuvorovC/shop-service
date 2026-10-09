@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.web.shop_service.TestSecurityConfig;
+import org.web.shop_service.support.configs.TestSecurityConfig;
 import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.utils.JsonUtils;

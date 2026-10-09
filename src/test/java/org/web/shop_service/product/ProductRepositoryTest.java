@@ -1,6 +1,5 @@
 package org.web.shop_service.product;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.web.shop_service.TestContainersFactory;
+import org.web.shop_service.support.TestContainersFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

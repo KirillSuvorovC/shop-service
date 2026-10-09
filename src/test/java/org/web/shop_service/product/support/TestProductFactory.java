@@ -1,5 +1,6 @@
-package org.web.shop_service.product;
+package org.web.shop_service.product.support;
 
+import org.web.shop_service.product.Product;
 import org.web.shop_service.product.price_history.ProductPriceHistory;
 
 import java.math.BigDecimal;

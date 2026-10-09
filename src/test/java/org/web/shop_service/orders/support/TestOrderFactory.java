@@ -1,19 +1,22 @@
-package org.web.shop_service.orders;
+package org.web.shop_service.orders.support;
 
-import org.web.shop_service.product.TestProductFactory;
+import org.web.shop_service.orders.Order;
+import org.web.shop_service.orders.OrderItem;
+import org.web.shop_service.orders.OrderStatus;
+import org.web.shop_service.product.support.TestProductFactory;
 import org.web.shop_service.user.User;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-class TestOrderFactory {
+public class TestOrderFactory {
     /**
      * @param id идентификатор заказа
      * @param user пользователь, требующий заказ
      * @return {@link Order} заказ с одной позицией товара с привязкой к сущности
      */
-    static Order order(Long id, User user) {
+    public static Order order(Long id, User user) {
         final var order = new Order();
         order.setId(id);
         order.setUser(user);
@@ -36,7 +39,7 @@ class TestOrderFactory {
      * @param user пользователь, требующий заказ
      * @return {@link Order} заказ без позиций товаров
      */
-    static Order orderWithoutItems(Long id, User user) {
+    public static Order orderWithoutItems(Long id, User user) {
         final var order = new Order();
         order.setId(id);
         order.setUser(user);
@@ -50,7 +53,7 @@ class TestOrderFactory {
     /**
      * @return позицию товара без привязки к сущности {@link Order}
      */
-    static OrderItem orderItem() {
+    public static OrderItem orderItem() {
         final var product = TestProductFactory.createProduct(1L);
         final var item = new OrderItem();
         item.setId(1L);

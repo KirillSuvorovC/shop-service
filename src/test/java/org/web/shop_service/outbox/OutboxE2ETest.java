@@ -23,7 +23,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.web.shop_service.TestContainersFactory;
+import org.web.shop_service.support.TestContainersFactory;
 import org.web.shop_service.outbox.publishbox.PublishBoxService;
 
 import java.time.Duration;

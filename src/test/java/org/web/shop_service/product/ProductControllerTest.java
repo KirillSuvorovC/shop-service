@@ -18,7 +18,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.web.shop_service.TestSecurityConfig;
+import org.web.shop_service.product.support.TestProductFactory;
+import org.web.shop_service.support.configs.TestSecurityConfig;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

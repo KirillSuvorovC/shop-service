@@ -1,4 +1,4 @@
-package org.web.shop_service;
+package org.web.shop_service.support.configs;
 
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

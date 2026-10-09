@@ -1,4 +1,4 @@
-package org.web.shop_service;
+package org.web.shop_service.support.configs;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

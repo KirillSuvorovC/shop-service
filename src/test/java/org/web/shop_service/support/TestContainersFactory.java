@@ -1,4 +1,4 @@
-package org.web.shop_service;
+package org.web.shop_service.support;
 
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;

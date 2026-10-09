@@ -10,6 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.web.shop_service.product.*;
+import org.web.shop_service.product.support.TestProductFactory;
+import org.web.shop_service.support.configs.TestSecurityAOPConfig;
+import org.web.shop_service.support.TestUserDefaults;
 import org.web.shop_service.utils.JsonUtils;
 
 import java.math.BigDecimal;

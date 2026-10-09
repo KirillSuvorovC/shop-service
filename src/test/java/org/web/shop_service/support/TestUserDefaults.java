@@ -1,7 +1,7 @@
-package org.web.shop_service;
+package org.web.shop_service.support;
 
 import org.web.shop_service.user.CurrentUser;
-import org.web.shop_service.user.TestUserFactory;
+import org.web.shop_service.user.support.TestUserFactory;
 import org.web.shop_service.user.User;
 
 public class TestUserDefaults {
