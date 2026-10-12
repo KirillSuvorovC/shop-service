@@ -70,7 +70,7 @@ class OrderControllerTest {
                     .andExpect(jsonPath("$.id").value(1))
                     .andExpect(jsonPath("$.status").value("NEW"))
                     .andExpect(jsonPath("$.items.length()")
-                                    .value(request.items().length));
+                                    .value(request.items().size()));
         }
 
         @ParameterizedTest
@@ -122,7 +122,7 @@ class OrderControllerTest {
 
         private static OrderCreateRequest createRequest(Long productId, Integer amount) {
             final var item = new OrderCreateRequest.Item(productId, amount);
-            return new OrderCreateRequest(new OrderCreateRequest.Item[]{item});
+            return new OrderCreateRequest(List.of(item));
         }
     }
 

@@ -1,19 +1,21 @@
 package org.web.shop_service.orders;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.web.shop_service.product.Product;
 import org.web.shop_service.product.ProductService;
 import org.web.shop_service.user.AuthUser;
 import org.web.shop_service.user.User;
 import org.web.shop_service.user.UserService;
 import org.web.shop_service.utils.VersionHelper;
 
-import java.util.ArrayList;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -24,30 +26,27 @@ public class OrderServiceImpl implements OrderService {
     private final UserService userService;
     private final VersionHelper versionHelper;
 
-    /**
-     * Создает заказ в БД исходя из параметра {@code request}.
-     * Заказ оформляется для {@link User}, определение пользователя
-     * осуществляется по полю {@code currentUser.id}.
-     * После создания заказ имеет статус {@code OrderStatus.NEW}.
-     * @param request данные для создания заказа
-     * @param authUser текущий аутентифицированный пользователь
-     * @see OrderStatus
-     * @see OrderCreateRequest
-     * @throws EntityNotFoundException если продукт или пользователь не найден
-     * @return созданный заказ в виде {@link OrderDTO}
-     */
     @Transactional
     public OrderDTO create(OrderCreateRequest request, AuthUser authUser) {
         final var user = userService.getUserById(authUser.getId());
-        final var requestItems = request.items();
-        final var savedItems = new ArrayList<OrderItem>(requestItems.length);
+        final var savedItems = new ArrayList<OrderItem>(request.items().size());
         final var order = new Order();
-        for(final var orderItem : requestItems) {
-            final var product = productService.getProductEntityById(orderItem.productId());
+
+        final var expectedIds = request.items()
+                .stream()
+                .map(OrderCreateRequest.Item::productId)
+                .toList();
+        final var actualProducts = productService.getProductEntitiesAsMap(expectedIds);
+        checkExistsProducts(expectedIds, actualProducts);
+        for (int i = 0; i < expectedIds.size(); i++) {
+            final Long expectedId = expectedIds.get(i);
+            final var product = actualProducts.get(expectedId);
+            final int amount = request.items().get(i).amount();
+
             final var savedItem = new OrderItem();
             savedItem.setOrder(order);
             savedItem.setProduct(product);
-            savedItem.setAmount(orderItem.amount());
+            savedItem.setAmount(amount);
             savedItem.setPriceAtOrder(product.getPrice());
             savedItems.add(savedItem);
         }
@@ -60,13 +59,6 @@ public class OrderServiceImpl implements OrderService {
         return new OrderDTO(order);
     }
 
-    /**
-     * @param id идентификатор заказа
-     * @param request данные для изменения статуса
-     * @throws EntityNotFoundException если заказ не найден
-     * @throws OptimisticLockingFailureException если данные заказа устарели
-     * @return обновленный заказ в виде {@link OrderDTO}
-     */
     @Override
     public OrderDTO updateStatus(Long id, OrderUpdateStatusRequest request) {
         final var order = getOrderEntityById(id);
@@ -94,5 +86,22 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                             "Order not found with id " + id));
+    }
+
+
+
+    private void checkExistsProducts(List<Long> expectedIds,
+                                     Map<Long, Product> actualProducts) {
+        Set<Long> nonExistsIds = null;
+        for (final Long expectedId : expectedIds) {
+            if(!actualProducts.containsKey(expectedId)) {
+                if(nonExistsIds == null) nonExistsIds = new HashSet<>();
+                nonExistsIds.add(expectedId);
+            }
+        }
+        if(nonExistsIds != null) {
+            throw new EntityNotFoundException("Products not found with ids: "
+                    + nonExistsIds);
+        }
     }
 }

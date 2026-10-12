@@ -7,13 +7,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+
 @Schema(description = "Запрос на создание заказа")
 public record OrderCreateRequest(
         @NotEmpty(message = INVALID_ORDER_ITEMS)
         @Size(min = 1, max = 10, message = INVALID_ORDER_ITEMS)
         @Valid
         @Schema(description = "Список позиций заказа")
-        Item[] items
+        List<Item> items
 )
 {
     @Schema(title = "OrderCreateRequest.Item")

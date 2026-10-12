@@ -15,12 +15,13 @@ import org.web.shop_service.product.Product;
 import org.web.shop_service.product.ProductService;
 import org.web.shop_service.product.support.TestProductFactory;
 import org.web.shop_service.user.AuthUser;
-import org.web.shop_service.user.support.TestUserFactory;
 import org.web.shop_service.user.User;
 import org.web.shop_service.user.UserService;
+import org.web.shop_service.user.support.TestUserFactory;
 import org.web.shop_service.utils.VersionHelper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,23 +57,19 @@ class OrderServiceImplTest {
         void shouldCreateOrderAndReturnDto() {
             // Given
             final var request = createRequest();
-            final Product[] products = {
-                    TestProductFactory.createProduct(1L),
-                    TestProductFactory.createProduct(2L)
-            };
 
             when(userService.getUserById(DEFAULT_USER.getId())).thenReturn(DEFAULT_USER);
-            when(productService.getProductEntityById(anyLong())).thenReturn(
-                    products[0],
-                    products[1]
-            );
+            when(productService.getProductEntitiesAsMap(any())).thenReturn(Map.of(
+                    1L, TestProductFactory.createProduct(1L),
+                    2L, TestProductFactory.createProduct(2L)
+            ));
             // Action
             final var response = orderService.create(request, DEFAULT_AUTH_USER);
             // Check
             assertThat(response).isNotNull();
             verify(orderRepository, times(1)).save(any());
             verify(userService, times(1)).getUserById(DEFAULT_USER.getId());
-            verify(productService, times(products.length)).getProductEntityById(anyLong());
+            verify(productService, times(1)).getProductEntitiesAsMap(any());
         }
 
         @Test
@@ -80,8 +77,9 @@ class OrderServiceImplTest {
         void shouldThrowWhenProductNotFound() {
             // Given
             final var request = createRequest();
+            final var products = Map.of(1L, TestProductFactory.createProduct(1L));
             when(userService.getUserById(DEFAULT_USER.getId())).thenReturn(DEFAULT_USER);
-            when(productService.getProductEntityById(any())).thenThrow(EntityNotFoundException.class);
+            when(productService.getProductEntitiesAsMap(any())).thenReturn(products);
             // Action && Check
             assertThatThrownBy(() -> orderService.create(request, DEFAULT_AUTH_USER))
                     .isInstanceOf(EntityNotFoundException.class);
@@ -100,10 +98,10 @@ class OrderServiceImplTest {
         }
 
         private OrderCreateRequest createRequest() {
-            return new OrderCreateRequest(new OrderCreateRequest.Item[]{
+            return new OrderCreateRequest(List.of(
                     new OrderCreateRequest.Item(1L, 1),
                     new OrderCreateRequest.Item(2L, 2)
-            });
+            ));
         }
     }
 

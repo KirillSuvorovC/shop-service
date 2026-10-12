@@ -2,6 +2,7 @@ package org.web.shop_service.product;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +13,12 @@ import org.web.shop_service.utils.VersionHelper;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -61,11 +67,6 @@ public class ProductServiceImpl implements ProductService {
         return ProductDTO.fromProduct(product);
     }
 
-    /**
-     * @throws EntityNotFoundException если продукт не найден
-     * @param id идентификатор заказа
-     * @return найденный продукт в виде {@link ProductDTO}
-     */
     @Override
     public ProductDTO getProductById(Long id) {
         final var product = getProductEntityById(id);
@@ -79,27 +80,25 @@ public class ProductServiceImpl implements ProductService {
         return new ProductsDTO(products);
     }
 
-    /**
-     * Вместо физического удаления архивизируем продукт,
-     * чтобы сохранить связи между таблицами.
-     * @param id идентификатор заказа
-     */
     @Override
     @Transactional
     public void deleteProduct(Long id) {
         repository.markProductAsArchived(id);
+        log.info("Archived Product with id: {}", id);
     }
 
-    /**
-     * @throws EntityNotFoundException если продукт не найден
-     * @param id идентификатор заказа
-     * @return найденная сущность {@link Product}
-     */
     @Override
     public Product getProductEntityById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Product not found with id: " + id));
+    }
+
+    @Override
+    public Map<Long, Product> getProductEntitiesAsMap(Iterable<Long> ids) {
+        return repository.findAllById(ids)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
     }
 
     private void publishEvent(Product product, ZonedDateTime updatedAt) {
