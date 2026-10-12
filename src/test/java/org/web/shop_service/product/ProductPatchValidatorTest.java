@@ -53,7 +53,14 @@ class ProductPatchValidatorTest extends MockitoExtension {
     }
 
     static Stream<Arguments> invalidArguments() {
+        final var priceMoreMaximum = BigDecimal.valueOf(
+                ProductConstants.MAX_PRICE + 1,
+                ProductConstants.FRACTION_PRICE);
+        final String longestName = "P".repeat(ProductConstants.MAX_SIZE_NAME + 1);
+
         return Stream.of(
+                arguments("Product", priceMoreMaximum),
+                arguments(longestName, new BigDecimal("50.00")),
                 arguments("Product", new BigDecimal("-1")),
                 arguments("Product", new BigDecimal("0.001")),
                 arguments("n", new BigDecimal("50.00")),

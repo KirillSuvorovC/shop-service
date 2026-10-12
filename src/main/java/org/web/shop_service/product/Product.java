@@ -19,9 +19,10 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id", nullable = false, unique = true)
     private Long id;
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false, length = ProductConstants.MAX_SIZE_NAME)
     private String name;
-    @Column(nullable = false)
+    @Column(nullable = false, precision = ProductConstants.PRECISION_PRICE,
+                              scale = ProductConstants.FRACTION_PRICE)
     private BigDecimal price = new BigDecimal("0.00");
     @Column(name = "created_at", columnDefinition = "timestamp with time zone")
     private ZonedDateTime createdAt;

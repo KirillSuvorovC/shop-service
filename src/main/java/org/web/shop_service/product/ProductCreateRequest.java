@@ -1,26 +1,28 @@
 package org.web.shop_service.product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
+import static org.web.shop_service.product.ProductConstants.*;
+
 @Schema(description = "Запрос на создание продукта")
 public record ProductCreateRequest(
-        // TODO: добавить порог максимума символов
-        @Size(min = MIN_SIZE_NAME, message = INVALID_SIZE_NAME)
+        @Size(min = MIN_SIZE_NAME, max = MAX_SIZE_NAME, message = INVALID_SIZE_NAME)
         @NotBlank(message = INVALID_NOT_BLANK_NAME)
-        @Schema(description = "Имя", example = "Product", minLength = MIN_SIZE_NAME)
+        @Schema(description = "Имя", example = "Product",
+                minLength = MIN_SIZE_NAME,
+                maxLength = MAX_SIZE_NAME)
         String name,
-        // TODO: добавить порог максимальной цены
-        @Positive(message = INVALID_DECIMAL_MIN_PRICE)
-        @Schema(description = "Цена", example = "10.00", minLength = MIN_SIZE_NAME)
+        @Positive(message = INVALID_PRICE)
+        @Digits(integer = PRECISION_PRICE,
+                fraction = FRACTION_PRICE, message = INVALID_PRICE)
+        @Schema(description = "Цена", example = "10.00",
+                minimum = MIN_PRICE + "",
+                maximum = MAX_PRICE + "")
         BigDecimal price
-) {
-    public static final int MIN_SIZE_NAME = 3;
-    public static final String INVALID_SIZE_NAME = "name should be 3 and more characters";
-    public static final String INVALID_NOT_BLANK_NAME = "name should be not empty";
-    public static final String INVALID_DECIMAL_MIN_PRICE = "the price must be greater than 0";
-}
+) {}

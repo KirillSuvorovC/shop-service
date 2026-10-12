@@ -9,19 +9,24 @@ import java.math.RoundingMode;
 
 @Component
 public class ProductPatchValidator {
+    private static final BigDecimal MAX_PRICE = BigDecimal.valueOf(ProductConstants.MAX_PRICE,
+                                                            ProductConstants.FRACTION_PRICE);
     public void validate(ProductPatchRequest request) {
         final String name = request.getName();
         if(name != null) {
             if(StringUtils.isBlank(name))
-                throw new ValidationException(ProductCreateRequest.INVALID_NOT_BLANK_NAME);
-            if(name.length() < ProductCreateRequest.MIN_SIZE_NAME)
-                throw new ValidationException(ProductCreateRequest.INVALID_SIZE_NAME);
+                throw new ValidationException(ProductConstants.INVALID_NOT_BLANK_NAME);
+            if(name.length() < ProductConstants.MIN_SIZE_NAME ||
+               name.length() > ProductConstants.MAX_SIZE_NAME)
+                throw new ValidationException(ProductConstants.INVALID_SIZE_NAME);
         }
         final BigDecimal newPrice = request.getPrice();
         if(newPrice != null) {
-            final BigDecimal roundedPrice = newPrice.setScale(2, RoundingMode.HALF_UP);
-            if(roundedPrice.compareTo(BigDecimal.ZERO) <= 0)
-                throw new ValidationException(ProductCreateRequest.INVALID_DECIMAL_MIN_PRICE);
+            final BigDecimal roundedPrice = newPrice.setScale(ProductConstants.FRACTION_PRICE,
+                                                              RoundingMode.HALF_UP);
+            if(roundedPrice.compareTo(BigDecimal.ZERO) <= 0 ||
+               roundedPrice.compareTo(MAX_PRICE) >= 1)
+                throw new ValidationException(ProductConstants.INVALID_PRICE);
         }
     }
 }
