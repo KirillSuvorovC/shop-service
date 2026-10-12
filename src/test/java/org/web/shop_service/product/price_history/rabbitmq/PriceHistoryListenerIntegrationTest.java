@@ -13,7 +13,9 @@ import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.web.shop_service.support.ProfileTest;
 import org.web.shop_service.support.TestContainersFactory;
+import org.web.shop_service.support.configs.EnableTestRabbitTemplate;
 import org.web.shop_service.support.configs.TestRabbitMQConfig;
 import org.web.shop_service.outbox.publishbox.PublishBoxRepository;
 import org.web.shop_service.outbox.publishbox.PublishBoxService;
@@ -31,8 +33,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
+@ProfileTest
 @Testcontainers
-@Import(TestRabbitMQConfig.class)
+@EnableTestRabbitTemplate
 @Sql("/org/web/shop_service/product/insert_values.sql")
 class PriceHistoryListenerIntegrationTest {
     @Container

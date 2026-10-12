@@ -23,6 +23,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.web.shop_service.support.ProfileTest;
 import org.web.shop_service.support.TestContainersFactory;
 import org.web.shop_service.outbox.publishbox.PublishBoxService;
 
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
+@ProfileTest
 @Import(OutboxE2ETest.TestPublishBoxListener.class)
 @Testcontainers
 class OutboxE2ETest {

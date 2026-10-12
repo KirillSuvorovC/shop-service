@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @WebMvcTest
 @Import(TestSecurityAOPConfig.class)
-@ActiveProfiles("test")
+@ProfileTest
 public @interface RestControllerTest {
     @AliasFor(annotation = WebMvcTest.class, attribute = "controllers")
     Class<?>[] controllers() default {};
