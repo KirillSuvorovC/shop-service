@@ -50,18 +50,15 @@ class UserServiceTest {
             when(roleService.getRoleByName(Role.ROLE_USER)).thenReturn(new Role(Role.ROLE_USER));
             when(encoder.encode(DEFAULT_PASSWORD)).thenReturn(encodedPassword);
             // Action
-            final var userDetails = userService.createUser(request);
-            final var authority = userDetails.getAuthorities()
-                    .stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .findFirst();
+            final var user = userService.createUser(request);
+            final var roleName = user.getRole().getName();
             // Check
-            assertNotNull(userDetails);
-            assertNotNull(authority);
+            assertNotNull(user);
+            assertNotNull(roleName);
             verify(encoder, times(1)).encode(DEFAULT_PASSWORD);
-            assertEquals(DEFAULT_USERNAME, userDetails.getUsername());
-            assertEquals(encodedPassword, userDetails.getPassword());
-            assertEquals(Role.ROLE_USER, authority.get());
+            assertEquals(DEFAULT_USERNAME, user.getUsername());
+            assertEquals(encodedPassword, user.getPassword());
+            assertEquals(Role.ROLE_USER, roleName);
         }
         @Test
         @DisplayName("Если пользователь существует - бросить исключение")

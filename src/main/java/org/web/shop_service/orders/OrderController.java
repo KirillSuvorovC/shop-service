@@ -16,7 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.web.shop_service.openapi.OpenAPIConfig;
 import org.web.shop_service.openapi.RuPageableAsQueryParam;
-import org.web.shop_service.user.CurrentUser;
+import org.web.shop_service.user.AuthUser;
 
 @RequiredArgsConstructor
 @RestController
@@ -43,7 +43,7 @@ public class OrderController {
             }
     )
     public OrderDTO create(@Valid @RequestBody OrderCreateRequest request,
-                           @AuthenticationPrincipal CurrentUser user) {
+                           @AuthenticationPrincipal AuthUser user) {
         return orderService.create(request, user);
     }
 
@@ -79,7 +79,7 @@ public class OrderController {
             }
     )
     @RuPageableAsQueryParam
-    public OrdersDTO findAllByUserId(@AuthenticationPrincipal CurrentUser user,
+    public OrdersDTO findAllByUserId(@AuthenticationPrincipal AuthUser user,
                  @PageableDefault(size = 20) @Parameter(hidden = true) Pageable pageable) {
         return orderService.findAllByUserId(user, pageable);
     }

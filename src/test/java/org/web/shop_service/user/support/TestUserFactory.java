@@ -2,7 +2,7 @@ package org.web.shop_service.user.support;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.web.shop_service.role.Role;
-import org.web.shop_service.user.CurrentUser;
+import org.web.shop_service.user.AuthUser;
 import org.web.shop_service.user.User;
 
 import java.util.List;
@@ -21,17 +21,17 @@ public class TestUserFactory {
         return create(Role.ROLE_ADMIN);
     }
     /**
-     * @return созданного пользователя с ролью ROLE_ADMIN типа {@link CurrentUser}
+     * @return созданного пользователя с ролью ROLE_ADMIN типа {@link AuthUser}
      */
-    public static CurrentUser defaultAuthAdmin() {
-        return new CurrentUser(1L, "admin",
+    public static AuthUser defaultAuthAdmin() {
+        return new AuthUser(1L, "admin",
                 List.of(new SimpleGrantedAuthority(Role.ROLE_ADMIN)));
     }
     /**
-     * @return созданного пользователя с ролью ROLE_USER типа {@link CurrentUser}
+     * @return созданного пользователя с ролью ROLE_USER типа {@link AuthUser}
      */
-    public static CurrentUser defaultAuthUser() {
-        return new CurrentUser(1L, "user",
+    public static AuthUser defaultAuthUser() {
+        return new AuthUser(1L, "user",
                 List.of(new SimpleGrantedAuthority(Role.ROLE_USER)));
     }
 

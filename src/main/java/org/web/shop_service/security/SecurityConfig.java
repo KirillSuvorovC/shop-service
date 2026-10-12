@@ -1,5 +1,6 @@
 package org.web.shop_service.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,6 +17,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.web.shop_service.utils.JwtUtils;
+
+import java.time.Duration;
 
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
@@ -62,5 +66,11 @@ public class SecurityConfig {
                 .authenticationProvider(provider)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public JwtUtils jwtUtils(@Value("${jwt.secret}") String secret,
+                             @Value("${jwt.lifetime}") Duration jwtLifetime) {
+        return new JwtUtils(secret, jwtLifetime);
     }
 }

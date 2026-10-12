@@ -11,8 +11,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.web.shop_service.support.configs.TestSecurityConfig;
 import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
+import org.web.shop_service.support.RestControllerTest;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.utils.JsonUtils;
 import org.web.shop_service.utils.JwtUtils;
@@ -26,8 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthController.class)
-@ContextConfiguration(classes = TestSecurityConfig.class)
+@RestControllerTest(controllers = AuthController.class)
 public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;

@@ -66,7 +66,7 @@ public class UserService implements UserDetailsService {
      * @return созданного пользователя в виде {@link UserDetails}
  *             с ролью {@link Role#ROLE_USER}
      */
-    public UserDetails createUser(UserRegisterRequest request) {
+    public User createUser(UserRegisterRequest request) {
         if(userRepository.existsByUsername(request.username())) {
             throw new UserAlreadyExistsException(request.username());
         }
@@ -75,8 +75,6 @@ public class UserService implements UserDetailsService {
         newUser.setPassword(passwordEncoder.encode(request.password()));
         newUser.setRole(roleService.getRoleByName(Role.ROLE_USER));
         userRepository.save(newUser);
-        final var authorities = List.of(new SimpleGrantedAuthority(newUser.getRole().getName()));
-        return new org.springframework.security.core.userdetails.User(
-                newUser.getUsername(), newUser.getPassword(), authorities);
+        return newUser;
     }
 }

@@ -4,22 +4,21 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
 import java.util.List;
 
-public class CurrentUser implements UserDetails {
+public class AuthUser implements UserDetails {
     private final Long id;
     private final String username;
     private final List<? extends GrantedAuthority> authorities;
 
-    public CurrentUser(Long id, String username,
-                       List<? extends GrantedAuthority> authorities) {
+    public AuthUser(Long id, String username,
+                    List<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.authorities = authorities;
     }
 
-    public CurrentUser(User user) {
+    public AuthUser(User user) {
         this(user.getId(), user.getUsername(),
                 List.of(new SimpleGrantedAuthority(user.getRole().getName())));
     }

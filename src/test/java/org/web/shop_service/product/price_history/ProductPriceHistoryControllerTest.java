@@ -3,14 +3,12 @@ package org.web.shop_service.product.price_history;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.web.shop_service.support.configs.TestSecurityConfig;
 import org.web.shop_service.product.support.TestProductFactory;
+import org.web.shop_service.support.RestControllerTest;
 import org.web.shop_service.utils.JsonUtils;
 
 import java.util.ArrayList;
@@ -22,8 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ProductPriceHistoryController.class)
-@ContextConfiguration(classes = TestSecurityConfig.class)
+@RestControllerTest(controllers = ProductPriceHistoryController.class)
 public class ProductPriceHistoryControllerTest {
     @Autowired
     private MockMvc mockMvc;

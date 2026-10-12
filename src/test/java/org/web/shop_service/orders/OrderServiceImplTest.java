@@ -14,7 +14,7 @@ import org.web.shop_service.orders.support.TestOrderFactory;
 import org.web.shop_service.product.Product;
 import org.web.shop_service.product.ProductService;
 import org.web.shop_service.product.support.TestProductFactory;
-import org.web.shop_service.user.CurrentUser;
+import org.web.shop_service.user.AuthUser;
 import org.web.shop_service.user.support.TestUserFactory;
 import org.web.shop_service.user.User;
 import org.web.shop_service.user.UserService;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceImplTest {
     private static final User DEFAULT_USER = TestUserFactory.defaultUserEntity();
-    private static final CurrentUser DEFAULT_AUTH_USER = TestUserFactory.defaultAuthUser();
+    private static final AuthUser DEFAULT_AUTH_USER = TestUserFactory.defaultAuthUser();
 
     @Mock
     private OrderRepository orderRepository;

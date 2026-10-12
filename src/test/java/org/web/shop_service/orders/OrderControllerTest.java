@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.web.shop_service.orders.support.TestOrderFactory;
 import org.web.shop_service.support.configs.TestSecurityAOPConfig;
 import org.web.shop_service.support.TestUserDefaults;
-import org.web.shop_service.user.CurrentUser;
+import org.web.shop_service.user.AuthUser;
 import org.web.shop_service.utils.JsonUtils;
 
 import java.util.List;
@@ -208,7 +208,7 @@ class OrderControllerTest {
         }
 
         private ResultActions performRequestWithIfMatch(Object requestBody,
-                                                        CurrentUser authUser,
+                                                        AuthUser authUser,
                                                         String ifMatch)
                                                         throws Exception {
             return mockMvc.perform(put(URI_TEMPLATE)
@@ -325,7 +325,7 @@ class OrderControllerTest {
     }
 
     private ResultActions performRequest(HttpMethod method, String uriTemplate,
-                                Object requestBody, CurrentUser authUser)
+                                Object requestBody, AuthUser authUser)
             throws Exception {
         return mockMvc.perform(request(method, uriTemplate)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -334,7 +334,7 @@ class OrderControllerTest {
                 .with(user(authUser)));
     }
 
-    private ResultActions performGetRequest(String uriTemplate, CurrentUser authUser)
+    private ResultActions performGetRequest(String uriTemplate, AuthUser authUser)
             throws Exception {
         return mockMvc.perform(get(uriTemplate)
                 .with(csrf())

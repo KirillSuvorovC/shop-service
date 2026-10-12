@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.web.shop_service.role.Role;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.user.UserService;
+import org.web.shop_service.user.support.TestUserFactory;
 import org.web.shop_service.utils.JwtUtils;
 import org.web.shop_service.utils.exceptions.InvalidRequestException;
 
@@ -49,13 +50,10 @@ class AuthServiceImplTest {
             final String password = "password";
             final String jwt = "JsonWebToken";
             final var request = new UserRegisterRequest(username, password, password);
-            final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                    username,
-                    password,
-                    List.of(new SimpleGrantedAuthority(Role.ROLE_USER)));
+            final User user = TestUserFactory.defaultUserEntity();
 
-            when(userService.createUser(request)).thenReturn(userDetails);
-            when(jwtUtils.generateToken(userDetails)).thenReturn(jwt);
+            when(userService.createUser(request)).thenReturn(user);
+            when(jwtUtils.generateToken(user)).thenReturn(jwt);
             // Action
             final var response = authService.registerUser(request);
 
@@ -100,13 +98,10 @@ class AuthServiceImplTest {
             final String password = "password";
             final String jwt = "JsonWebToken";
             final var request = new JwtRequest(username, password);
-            final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                    username,
-                    password,
-                    List.of(new SimpleGrantedAuthority(Role.ROLE_USER)));
+            final User user = TestUserFactory.defaultUserEntity();
 
-            when(userService.loadUserByUsername(username)).thenReturn(userDetails);
-            when(jwtUtils.generateToken(userDetails)).thenReturn(jwt);
+            when(userService.getUserByUsername(username)).thenReturn(user);
+            when(jwtUtils.generateToken(user)).thenReturn(jwt);
 
             // Action
             final var response = authService.createAuthToken(request);
@@ -120,7 +115,7 @@ class AuthServiceImplTest {
         void whenUserServiceThrowException_rethrow() {
             // Given
             final var request = new JwtRequest("unknown", "password");
-            when(userService.loadUserByUsername(any())).thenThrow(UsernameNotFoundException.class);
+            when(userService.getUserByUsername(any())).thenThrow(UsernameNotFoundException.class);
 
             // Action && Check
             assertThrows(UsernameNotFoundException.class, () -> authService.createAuthToken(request));

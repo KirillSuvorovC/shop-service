@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web.shop_service.product.ProductService;
-import org.web.shop_service.user.CurrentUser;
+import org.web.shop_service.user.AuthUser;
 import org.web.shop_service.user.User;
 import org.web.shop_service.user.UserService;
 import org.web.shop_service.utils.VersionHelper;
@@ -30,15 +30,15 @@ public class OrderServiceImpl implements OrderService {
      * осуществляется по полю {@code currentUser.id}.
      * После создания заказ имеет статус {@code OrderStatus.NEW}.
      * @param request данные для создания заказа
-     * @param currentUser текущий аутентифицированный пользователь
+     * @param authUser текущий аутентифицированный пользователь
      * @see OrderStatus
      * @see OrderCreateRequest
      * @throws EntityNotFoundException если продукт или пользователь не найден
      * @return созданный заказ в виде {@link OrderDTO}
      */
     @Transactional
-    public OrderDTO create(OrderCreateRequest request, CurrentUser currentUser) {
-        final var user = userService.getUserById(currentUser.getId());
+    public OrderDTO create(OrderCreateRequest request, AuthUser authUser) {
+        final var user = userService.getUserById(authUser.getId());
         final var requestItems = request.items();
         final var savedItems = new ArrayList<OrderItem>(requestItems.length);
         final var order = new Order();
@@ -85,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrdersDTO findAllByUserId(CurrentUser user, Pageable pageable) {
+    public OrdersDTO findAllByUserId(AuthUser user, Pageable pageable) {
         final var orders = orderRepository.findAllByUserId(user.getId(), pageable);
         return new OrdersDTO(orders);
     }
