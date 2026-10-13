@@ -1,12 +1,15 @@
 package org.web.shop_service.support.configs;
 
+import com.github.fridujo.rabbitmq.mock.compatibility.MockConnectionFactoryFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.test.TestRabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.TestPropertySource;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Используется для теста RabbitMQ без поднятия
@@ -19,5 +22,9 @@ public class TestRabbitMQConfig {
         final var template = new TestRabbitTemplate(connectionFactory);
         template.setMessageConverter(new Jackson2JsonMessageConverter());
         return template;
+    }
+    @Bean
+    public ConnectionFactory connectionFactory() {
+        return new CachingConnectionFactory(MockConnectionFactoryFactory.build());
     }
 }
