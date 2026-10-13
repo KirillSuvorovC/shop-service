@@ -35,6 +35,7 @@ public class ProductServiceImpl implements ProductService {
         product.setName(request.name());
         product.setPrice(request.price());
         product.setCreatedAt(ZonedDateTime.now(ZoneOffset.UTC));
+        product.setArchived(false);
         repository.save(product);
         publishEvent(product, product.getCreatedAt());
         return ProductDTO.fromProduct(product);
