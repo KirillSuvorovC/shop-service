@@ -40,7 +40,8 @@ docker compose down
 ```
 
 ## Тесты
-162 теста (unit · slice · integration · E2E), ~3-6 мин
+162 теста (unit · slice · integration · E2E), ~3-6 мин.
+Запустить тесты:
 ```bash
 ./mvnw test
 ```
