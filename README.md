@@ -16,7 +16,7 @@ REST API интернет-магазина с JWT-аутентификацией
 * Ролевая модель доступа (USER, ADMIN)
 * CRUD для заказов, продуктов, пользователей
 * Валидация входных данных с единым форматом ошибок (`@RestControllerAdvice`)
-* Оптимистичная блокировка при редактировании заказа
+* Оптимистичная блокировка при редактировании заказа, продукта
 * Гарантированная публикация событий через Transaction Outbox
 * История изменения цен продуктов
 
@@ -27,13 +27,20 @@ REST API интернет-магазина с JWT-аутентификацией
 * **JWT (15 мин TTL)** — stateless-авторизация без похода в БД
 
 ## Запуск
+1. Скопируйте `.env.example` в `.env` и заполните значения.
+2. Запустите:
 ```bash
-docker-compose up
+docker compose up
 ```
-Swagger: http://localhost:8080/swagger-ui.html
-d
+3. Приложение: http://localhost:8080
+   Swagger: http://localhost:8080/swagger-ui.html
+4. Для остановки:
+```bash
+docker compose down
+```
+
 ## Тесты
-162 теста (unit · integration · slice · E2E), ~3-6 мин
+162 теста (unit · slice · integration · E2E), ~3-6 мин
 ```bash
 ./mvnw test
 ```
