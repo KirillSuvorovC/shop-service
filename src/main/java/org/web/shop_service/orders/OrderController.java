@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.web.shop_service.openapi.IfMatchHeader;
 import org.web.shop_service.openapi.OpenAPIConfig;
 import org.web.shop_service.openapi.RuPageableAsQueryParam;
 import org.web.shop_service.user.AuthUser;
@@ -60,6 +61,7 @@ public class OrderController {
                     content = @Content)
             }
     )
+    @IfMatchHeader
     public OrderDTO updateStatus(@PathVariable Long id,
                                  @Valid @RequestBody
                                  OrderUpdateStatusRequest request) {

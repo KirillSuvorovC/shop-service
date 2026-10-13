@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,9 @@ public class AuthController {
     public void createAuthToken(@Valid @RequestBody JwtRequest request,
                                                     HttpServletResponse response) {
         final var jwtResponse = service.createAuthToken(request);
-        createCookieToken(jwtResponse, response);
+        CookieHelper.createCookieJwt(jwtResponse.token(),
+                                     jwtUtils.getJwtLifetimeOfSeconds(),
+                                     response);
     }
 
     @PostMapping("/register")
@@ -55,15 +56,8 @@ public class AuthController {
     public void registerUser(@Valid @RequestBody UserRegisterRequest request,
                                                  HttpServletResponse response) {
         final var jwtResponse = service.registerUser(request);
-        createCookieToken(jwtResponse, response);
-    }
-
-    private void createCookieToken(JwtResponse jwtResponse, HttpServletResponse response) {
-        final var cookie = new Cookie("token", jwtResponse.token());
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge((int)jwtUtils.getJwtLifetimeOfSeconds());
-        response.addCookie(cookie);
+        CookieHelper.createCookieJwt(jwtResponse.token(),
+                                     jwtUtils.getJwtLifetimeOfSeconds(),
+                                     response);
     }
 }
