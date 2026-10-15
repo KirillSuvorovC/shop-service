@@ -26,15 +26,23 @@ REST API интернет-магазина с JWT-аутентификацией
 * **Оптимистичная блокировка** (`If-Match`) — безопасный конкурентный доступ
 * **JWT (15 мин TTL)** — stateless-авторизация без похода в БД
 
+## Требования
+- Docker + Docker Compose
+
 ## Запуск
-1. Скопируйте `.env.example` в `.env` и заполните значения.
-2. Запустите:
+1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/KirillSuvorovC/shop-service.git
+cd shop-service
+```
+2. Скопируйте `.env.example` в `.env` и заполните значения.
+3. Запустите:
 ```bash
 docker compose up
 ```
-3. Приложение: http://localhost:8080
+4. API: http://localhost:8080
    Swagger: http://localhost:8080/swagger-ui.html
-4. Для остановки:
+5. Для остановки:
 ```bash
 docker compose down
 ```
