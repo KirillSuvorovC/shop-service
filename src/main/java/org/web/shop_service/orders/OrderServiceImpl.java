@@ -1,17 +1,16 @@
 package org.web.shop_service.orders;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web.shop_service.product.Product;
 import org.web.shop_service.product.ProductService;
 import org.web.shop_service.user.AuthUser;
-import org.web.shop_service.user.User;
 import org.web.shop_service.user.UserService;
 import org.web.shop_service.utils.VersionHelper;
 
@@ -21,6 +20,8 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+    public static final String CACHE_NAME_ORDERS = "orders";
+
     private final OrderRepository orderRepository;
     private final ProductService productService;
     private final UserService userService;
@@ -60,6 +61,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @CachePut(cacheNames = CACHE_NAME_ORDERS, key = "#id")
     public OrderDTO updateStatus(Long id, OrderUpdateStatusRequest request) {
         final var order = getOrderEntityById(id);
         versionHelper.checkVersion(request.getVersion(), order.getVersion());
@@ -71,6 +73,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME_ORDERS, key = "#id")
     public OrderDTO findById(Long id) {
         final Order order = getOrderEntityById(id);
         return new OrderDTO(order);
@@ -87,8 +90,6 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new EntityNotFoundException(
                             "Order not found with id " + id));
     }
-
-
 
     private void checkExistsProducts(List<Long> expectedIds,
                                      Map<Long, Product> actualProducts) {

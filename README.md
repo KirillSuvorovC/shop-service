@@ -6,7 +6,7 @@ REST API интернет-магазина с JWT-аутентификацией
 
 ## Стек технологий
 * Java 17, Spring Boot 3.5
-* PostgreSQL, Flyway
+* PostgreSQL, Flyway, Caffeine (local cache)
 * RabbitMQ (Transactional Outbox)
 * Docker, docker-compose
 * Testcontainers, JUnit 5, Mockito
@@ -23,6 +23,8 @@ REST API интернет-магазина с JWT-аутентификацией
 ## Ключевые решения
 * **Transaction Outbox** — гарантия доставки событий
 * **Идемпотентный потребитель** — защита от дублей при повторной доставке
+* **Кэширование (Caffeine)** - для эндпоинтов 'GET /api/products/{id}',
+'GET /api/orders/{id}'; списки с пагинацией не кэшируются из-за сложной инвалидации
 * **Оптимистичная блокировка** (`If-Match`) — безопасный конкурентный доступ
 * **JWT (15 мин TTL)** — stateless-авторизация без похода в БД
 
@@ -48,8 +50,8 @@ docker compose down
 ```
 
 ## Тесты
-162 теста (unit · slice · integration · E2E), ~3-6 мин.
-Запустить тесты:
+167 тестов (unit · slice · integration · E2E), ~3-6 мин.
+* Запустить тесты:
 ```bash
 ./mvnw test
 ```
