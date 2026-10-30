@@ -11,6 +11,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
+import org.web.shop_service.openapi.CustomHTTPHeaders;
+import org.web.shop_service.openapi.IdempotencyKeyHeader;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.utils.JwtUtils;
 
@@ -19,7 +22,8 @@ import org.web.shop_service.utils.JwtUtils;
 @RequiredArgsConstructor
 @Tag(name = "Registration/Authentication")
 public class AuthController {
-    private final AuthService service;
+    private final AuthService authService;
+    private final IdempotenceKeyService idempotenceKeyService;
     private final JwtUtils jwtUtils;
 
     @PostMapping("/login")
@@ -31,12 +35,13 @@ public class AuthController {
                 schema = @Schema(type = "string", example = "jwt=eyJ...; Path=/; HttpOnly"))),
         @ApiResponse(responseCode = "400", description = "Неверный логин или пароль")
     })
-    public void createAuthToken(@Valid @RequestBody JwtRequest request,
-                                                    HttpServletResponse response) {
-        final var jwtResponse = service.createAuthToken(request);
+    public void createAuthToken(@Valid @RequestBody
+                                JwtRequest request,
+                                HttpServletResponse response) {
+        final var jwtResponse = authService.createAuthToken(request);
         CookieHelper.createCookieJwt(jwtResponse.token(),
-                                     jwtUtils.getJwtLifetimeOfSeconds(),
-                                     response);
+                jwtUtils.getJwtLifetimeOfSeconds(),
+                response);
     }
 
     @PostMapping("/register")
@@ -53,9 +58,17 @@ public class AuthController {
             @ApiResponse(responseCode = "409",
                     description = "Пользователь с таким именем уже существует"),
     })
-    public void registerUser(@Valid @RequestBody UserRegisterRequest request,
-                                                 HttpServletResponse response) {
-        final var jwtResponse = service.registerUser(request);
+    @IdempotencyKeyHeader
+    public void registerUser(
+                             @RequestHeader(CustomHTTPHeaders.IDEMPOTENCY_KEY)
+                             String idempotenceKey,
+                             @Valid @RequestBody
+                             UserRegisterRequest request,
+                             HttpServletResponse response) {
+        final var jwtResponse = idempotenceKeyService.process(
+                idempotenceKey,
+                () -> authService.registerUser(request),
+                JwtResponse.class);
         CookieHelper.createCookieJwt(jwtResponse.token(),
                                      jwtUtils.getJwtLifetimeOfSeconds(),
                                      response);

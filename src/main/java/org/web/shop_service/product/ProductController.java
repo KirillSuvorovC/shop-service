@@ -13,9 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.web.shop_service.openapi.IfMatchHeader;
-import org.web.shop_service.openapi.OpenAPIConfig;
-import org.web.shop_service.openapi.RuPageableAsQueryParam;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
+import org.web.shop_service.openapi.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -28,7 +27,8 @@ import org.web.shop_service.openapi.RuPageableAsQueryParam;
         403 - если аутентифицирован, но не админ.
         """)
 public class ProductController {
-    private final ProductService service;
+    private final ProductService productService;
+    private final IdempotenceKeyService idempotenceKeyService;
 
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -39,9 +39,14 @@ public class ProductController {
             security = @SecurityRequirement(name = OpenAPIConfig.BEARER_AUTH)
     )
     @ApiResponse(responseCode = "400", description = "Некорректный запрос", content = @Content)
-    public ProductDTO createProduct(@Valid @RequestBody
+    @IdempotencyKeyHeader
+    public ProductDTO createProduct(@RequestHeader(CustomHTTPHeaders.IDEMPOTENCY_KEY)
+                                          String idempotencyKey,
+                                    @Valid @RequestBody
                                           ProductCreateRequest request) {
-        return service.createProduct(request);
+        return idempotenceKeyService.process(idempotencyKey,
+                () -> productService.createProduct(request),
+                ProductDTO.class);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -55,7 +60,7 @@ public class ProductController {
     @IfMatchHeader
     public ProductDTO updateProduct(@PathVariable Long id,
             @Valid @RequestBody ProductUpdateRequest request) {
-        return service.updateProduct(id, request);
+        return productService.updateProduct(id, request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -69,7 +74,7 @@ public class ProductController {
     @IfMatchHeader
     public ProductDTO patchProduct(@PathVariable Long id,
             @Valid @RequestBody ProductPatchRequest request) {
-        return service.patchProduct(id, request);
+        return productService.patchProduct(id, request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -81,7 +86,7 @@ public class ProductController {
     )
     @ApiResponse(responseCode = "204", description = "Успешно удален", content = @Content)
     public void deleteProduct(@PathVariable Long id) {
-        service.deleteProduct(id);
+        productService.deleteProduct(id);
     }
 
     @GetMapping("/{id}")
@@ -89,7 +94,7 @@ public class ProductController {
     @Operation(summary = "Получить конкретный продукт по ID")
     @ApiResponse(responseCode = "404", description = "Продукт не найден", content = @Content)
     public ProductDTO getProductById(@PathVariable Long id) {
-        return service.getProductById(id);
+        return productService.getProductById(id);
     }
 
     @GetMapping
@@ -98,6 +103,6 @@ public class ProductController {
     @RuPageableAsQueryParam
     public ProductsDTO getProducts(@PageableDefault(size = 20)
                                    @Parameter(hidden = true) Pageable pageable) {
-        return service.getProducts(pageable);
+        return productService.getProducts(pageable);
     }
 }

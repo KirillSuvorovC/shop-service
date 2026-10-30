@@ -19,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
+import org.web.shop_service.openapi.CustomHTTPHeaders;
 import org.web.shop_service.product.*;
 import org.web.shop_service.product.support.TestProductFactory;
 import org.web.shop_service.support.RestControllerTest;
@@ -28,6 +30,7 @@ import org.web.shop_service.utils.JsonUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
@@ -45,6 +48,9 @@ import static org.web.shop_service.utils.JsonUtils.asJson;
 class ProductControllerTest {
     @MockitoBean
     private ProductService service;
+    @MockitoBean
+    private IdempotenceKeyService idempotenceKeyService;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -59,13 +65,14 @@ class ProductControllerTest {
             final var dto = ProductDTO.fromProduct(product);
             final var requestJson = asJson(new ProductCreateRequest("Product",
                     product.getPrice()));
-            when(service.createProduct(any())).thenReturn(dto);
+            when(idempotenceKeyService.process(any(), any(), any())).thenReturn(dto);
             // Action && Check
             final var resultActions = mockMvc.perform(post("/api/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestJson)
                     .with(csrf())
-                    .with(user(TestUserDefaults.CURRENT_ADMIN)));
+                    .with(user(TestUserDefaults.CURRENT_ADMIN))
+                    .header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID()));
             expectProduct(resultActions, HttpStatus.CREATED, product);
         }
 
@@ -82,7 +89,8 @@ class ProductControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(asJson(request))
                             .with(csrf())
-                            .with(user(TestUserDefaults.CURRENT_ADMIN)))
+                            .with(user(TestUserDefaults.CURRENT_ADMIN))
+                            .header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID()))
                     // Check
                     .andExpect(status().isBadRequest());
         }

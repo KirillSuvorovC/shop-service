@@ -11,11 +11,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
+import org.web.shop_service.openapi.CustomHTTPHeaders;
 import org.web.shop_service.product.ProductController;
 import org.web.shop_service.product.ProductService;
 import org.web.shop_service.support.RestControllerTest;
 import org.web.shop_service.support.TestUserDefaults;
 
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -31,6 +35,8 @@ class ProductControllerSecurityTest {
 
     @MockitoBean
     private ProductService service;
+    @MockitoBean
+    private IdempotenceKeyService idempotenceKeyService;
 
     @MockitoBean
     private Validator validator;
@@ -42,11 +48,15 @@ class ProductControllerSecurityTest {
                                               String uriTemplate)
             throws Exception {
         // Action && Check
-        mockMvc.perform(request(method, uriTemplate)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-                        .header(HttpHeaders.IF_MATCH, "1")
-                        .with(csrf()))
+        final var requestBuilder = request(method, uriTemplate)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")
+                .header(HttpHeaders.IF_MATCH, "1")
+                .with(csrf());
+        if(HttpMethod.POST.matches(method.name()))
+            requestBuilder.header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID());
+
+        mockMvc.perform(requestBuilder)
                 .andExpect(status().isUnauthorized());
     }
 
@@ -57,17 +67,21 @@ class ProductControllerSecurityTest {
                                             String uriTemplate)
             throws Exception {
         // Action && Check
-        mockMvc.perform(request(method, uriTemplate)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-                        .header(HttpHeaders.IF_MATCH, "1")
-                        .with(csrf())
-                        .with(user(TestUserDefaults.CURRENT_USER)))
+        final var requestBuilder = request(method, uriTemplate)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")
+                .header(HttpHeaders.IF_MATCH, "1")
+                .with(csrf())
+                .with(user(TestUserDefaults.CURRENT_USER));
+        if(HttpMethod.POST.matches(method.name()))
+            requestBuilder.header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID());
+
+        mockMvc.perform(requestBuilder)
                 .andExpect(status().isForbidden());
     }
 
     public static Stream<Arguments> urls() {
-        // HTTPMethod | uriTemplate | request
+        // HTTPMethod | uriTemplate
         return Stream.of(
                 arguments(HttpMethod.POST, "/api/products"),
                 arguments(HttpMethod.PUT, "/api/products/1"),

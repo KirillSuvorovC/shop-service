@@ -14,9 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.web.shop_service.openapi.IfMatchHeader;
-import org.web.shop_service.openapi.OpenAPIConfig;
-import org.web.shop_service.openapi.RuPageableAsQueryParam;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
+import org.web.shop_service.openapi.*;
+import org.web.shop_service.product.ProductDTO;
 import org.web.shop_service.user.AuthUser;
 
 @RequiredArgsConstructor
@@ -29,6 +29,7 @@ import org.web.shop_service.user.AuthUser;
         """)
 public class OrderController {
     private final OrderService orderService;
+    private final IdempotenceKeyService idempotenceKeyService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -43,9 +44,17 @@ public class OrderController {
                     content = @Content)
             }
     )
-    public OrderDTO create(@Valid @RequestBody OrderCreateRequest request,
-                           @AuthenticationPrincipal AuthUser user) {
-        return orderService.create(request, user);
+    @IdempotencyKeyHeader
+    public OrderDTO create(
+                           @RequestHeader(CustomHTTPHeaders.IDEMPOTENCY_KEY)
+                           String idempotencyKey,
+                           @Valid @RequestBody
+                           OrderCreateRequest request,
+                           @AuthenticationPrincipal
+                           AuthUser user) {
+        return idempotenceKeyService.process(idempotencyKey,
+                () -> orderService.create(request, user),
+                OrderDTO.class);
     }
 
     @PutMapping("/{id}/status")

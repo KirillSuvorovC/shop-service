@@ -12,6 +12,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.web.shop_service.auth.exceptions.UserAlreadyExistsException;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
+import org.web.shop_service.openapi.CustomHTTPHeaders;
 import org.web.shop_service.support.RestControllerTest;
 import org.web.shop_service.user.UserRegisterRequest;
 import org.web.shop_service.utils.JsonUtils;
@@ -19,6 +21,7 @@ import org.web.shop_service.utils.JwtUtils;
 import org.web.shop_service.utils.exceptions.InvalidRequestException;
 
 import java.time.Duration;
+import java.util.UUID;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -34,6 +37,8 @@ public class AuthControllerTest {
     private JwtUtils jwtUtils;
     @MockitoBean
     private AuthService authService;
+    @MockitoBean
+    private IdempotenceKeyService idempotenceKeyService;
 
     @Nested
     @DisplayName("Регистрация")
@@ -49,14 +54,15 @@ public class AuthControllerTest {
                     "username",
                     "password",
                     "password");
-            when(authService.registerUser(any())).thenReturn(mockResponse);
+            when(idempotenceKeyService.process(any(), any(), any())).thenReturn(mockResponse);
             when(jwtUtils.getJwtLifetimeOfSeconds()).thenReturn(jwtLifetimeOfMinutes);
 
             // Action
             final String cookieName = "token";
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(JsonUtils.asJson(request)))
+                            .content(JsonUtils.asJson(request))
+                            .header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID()))
                     // Check
                     .andExpect(status().isCreated())
                     .andExpect(cookie().value(cookieName, mockResponse.token()))
@@ -71,11 +77,13 @@ public class AuthControllerTest {
                     "username",
                     "password",
                     "no-password");
-            when(authService.registerUser(any())).thenThrow(UserAlreadyExistsException.class);
+            when(idempotenceKeyService.process(any(), any(), any()))
+                        .thenThrow(UserAlreadyExistsException.class);
             // Action
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(JsonUtils.asJson(request)))
+                            .content(JsonUtils.asJson(request))
+                            .header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID()))
                     // Check
                     .andExpect(status().isConflict());
         }

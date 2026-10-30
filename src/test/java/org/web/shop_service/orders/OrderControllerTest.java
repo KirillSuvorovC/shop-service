@@ -20,6 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
+import org.web.shop_service.openapi.CustomHTTPHeaders;
 import org.web.shop_service.orders.support.TestOrderFactory;
 import org.web.shop_service.support.configs.TestSecurityAOPConfig;
 import org.web.shop_service.support.TestUserDefaults;
@@ -27,6 +29,7 @@ import org.web.shop_service.user.AuthUser;
 import org.web.shop_service.utils.JsonUtils;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -50,6 +53,9 @@ class OrderControllerTest {
     @MockitoBean
     private OrderService orderService;
 
+    @MockitoBean
+    private IdempotenceKeyService idempotenceKeyService;
+
     @Nested
     @DisplayName("POST /api/orders — создание заказа")
     class Create {
@@ -62,10 +68,14 @@ class OrderControllerTest {
             // Given
             final var request = createRequest(1L, 1);
             final var order = TestOrderFactory.order(1L, TestUserDefaults.ENTITY_USER);
-            when(orderService.create(any(), any())).thenReturn(new OrderDTO(order));
+            when(idempotenceKeyService.process(any(), any(), any())).thenReturn(new OrderDTO(order));
             // Action
-            performRequest(HttpMethod.POST, URI_TEMPLATE, request,
-                    TestUserDefaults.CURRENT_USER)
+            mockMvc.perform(post(URI_TEMPLATE)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(JsonUtils.asJson(request))
+                            .with(csrf())
+                            .with(user(TestUserDefaults.CURRENT_USER))
+                            .header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID()))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id").value(1))
                     .andExpect(jsonPath("$.status").value("NEW"))
@@ -78,10 +88,13 @@ class OrderControllerTest {
         @DisplayName("Возвращает 400 при некорректном запросе")
         void shouldReturn400WhenInvalidRequest(OrderCreateRequest request) throws Exception {
             // Action && Check
-            final var resultActions = performRequest(HttpMethod.POST, URI_TEMPLATE,
-                                                     request,
-                                                     TestUserDefaults.CURRENT_USER);
-                    // Check
+            final var resultActions = mockMvc.perform(post(URI_TEMPLATE)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(JsonUtils.asJson(request))
+                    .with(csrf())
+                    .with(user(TestUserDefaults.CURRENT_USER))
+                    .header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID()));
+            // Check
             checkError(resultActions, HttpStatus.BAD_REQUEST);
         }
 
@@ -90,12 +103,15 @@ class OrderControllerTest {
         void shouldReturn404WhenProductNotFound() throws Exception {
             // Given
             final var request = createRequest(999L, 1);
-            when(orderService.create(any(), any())).thenThrow(
+            when(idempotenceKeyService.process(any(), any(), any())).thenThrow(
                     new EntityNotFoundException("Product not found"));
             // Action
-            final var resultActions = performRequest(HttpMethod.POST, URI_TEMPLATE,
-                                                     request,
-                                                     TestUserDefaults.CURRENT_USER);
+            final var resultActions = mockMvc.perform(post(URI_TEMPLATE)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(JsonUtils.asJson(request))
+                    .with(csrf())
+                    .with(user(TestUserDefaults.CURRENT_USER))
+                    .header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID()));
             checkError(resultActions, HttpStatus.NOT_FOUND);
         }
 
@@ -105,9 +121,10 @@ class OrderControllerTest {
             final var request = createRequest(1L, 1);
             // Action
             final var resultActions = mockMvc.perform(post(URI_TEMPLATE)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(JsonUtils.asJson(request))
-                            .with(csrf()));
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(JsonUtils.asJson(request))
+                    .with(csrf())
+                    .header(CustomHTTPHeaders.IDEMPOTENCY_KEY, UUID.randomUUID()));
             checkError(resultActions, HttpStatus.UNAUTHORIZED);
         }
 

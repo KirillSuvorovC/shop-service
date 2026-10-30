@@ -3,15 +3,14 @@ package org.web.shop_service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
 import org.web.shop_service.product.*;
 import org.web.shop_service.product.support.TestProductFactory;
-import org.web.shop_service.support.configs.TestSecurityAOPConfig;
+import org.web.shop_service.support.RestControllerTest;
 import org.web.shop_service.support.TestUserDefaults;
 import org.web.shop_service.utils.JsonUtils;
 
@@ -27,13 +26,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ProductController.class)
-@Import(TestSecurityAOPConfig.class)
+@RestControllerTest(controllers = ProductController.class)
 class GlobalResponseBodyHandlerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockitoBean
-    private ProductService service;
+    private ProductService productService;
+    @MockitoBean
+    private IdempotenceKeyService idempotenceKeyService;
 
     @Test
     @DisplayName("""
@@ -46,7 +46,7 @@ class GlobalResponseBodyHandlerTest {
         final var request = new ProductCreateRequest(
                 "Product", new BigDecimal("50.00"));
         final var product = TestProductFactory.createProduct(1L);
-        when(service.updateProduct(any(), any())).thenReturn(ProductDTO.fromProduct(product));
+        when(productService.updateProduct(any(), any())).thenReturn(ProductDTO.fromProduct(product));
         // Action
         mockMvc.perform(put("/api/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -68,7 +68,7 @@ class GlobalResponseBodyHandlerTest {
     void shouldReturn200WithoutETag() throws Exception {
         // Given
         final var product = TestProductFactory.createProduct(1L);
-        when(service.getProducts(any())).thenReturn(new ProductsDTO(List.of(product)));
+        when(productService.getProducts(any())).thenReturn(new ProductsDTO(List.of(product)));
         // Action
         mockMvc.perform(get("/api/products"))
                 // Check

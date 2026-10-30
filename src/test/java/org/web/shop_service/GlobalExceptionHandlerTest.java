@@ -14,6 +14,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.web.shop_service.auth.JwtRequest;
+import org.web.shop_service.product.ProductController;
+import org.web.shop_service.support.RestControllerTest;
 import org.web.shop_service.support.TestExceptionController;
 import org.web.shop_service.support.configs.TestSecurityAOPConfig;
 import org.web.shop_service.utils.JsonUtils;
@@ -29,9 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Проверяет обработку исключений и формат ошибки
  */
-@WebMvcTest(TestExceptionController.class)
-@ActiveProfiles("test")
-@Import(TestSecurityAOPConfig.class)
+@RestControllerTest(controllers = TestExceptionController.class)
 public class GlobalExceptionHandlerTest {
     @Autowired
     private MockMvc mockMvc;

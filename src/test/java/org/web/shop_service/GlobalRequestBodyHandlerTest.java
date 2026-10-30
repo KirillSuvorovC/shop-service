@@ -12,9 +12,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.web.shop_service.idempotence.IdempotenceKeyService;
 import org.web.shop_service.product.ProductController;
 import org.web.shop_service.product.ProductCreateRequest;
 import org.web.shop_service.product.ProductService;
+import org.web.shop_service.support.RestControllerTest;
 import org.web.shop_service.support.configs.TestSecurityAOPConfig;
 import org.web.shop_service.utils.JsonUtils;
 
@@ -27,13 +29,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ProductController.class)
-@Import(TestSecurityAOPConfig.class)
+@RestControllerTest(controllers = ProductController.class)
 class GlobalRequestBodyHandlerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockitoBean
     private ProductService service;
+    @MockitoBean
+    private IdempotenceKeyService idempotenceKeyService;
 
     @Test
     @DisplayName("Вернуть 412, если HTTP-заголовок If-Match отсутствует")
