@@ -45,8 +45,8 @@ public class ProductController {
                                     @Valid @RequestBody
                                           ProductCreateRequest request) {
         return idempotenceKeyService.process(idempotencyKey,
-                () -> productService.createProduct(request),
-                ProductDTO.class);
+                "product:create",
+                () -> productService.createProduct(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

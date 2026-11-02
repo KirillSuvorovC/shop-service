@@ -67,8 +67,8 @@ public class AuthController {
                              HttpServletResponse response) {
         final var jwtResponse = idempotenceKeyService.process(
                 idempotenceKey,
-                () -> authService.registerUser(request),
-                JwtResponse.class);
+                "user:register",
+                () -> authService.registerUser(request));
         CookieHelper.createCookieJwt(jwtResponse.token(),
                                      jwtUtils.getJwtLifetimeOfSeconds(),
                                      response);

@@ -16,7 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.web.shop_service.idempotence.IdempotenceKeyService;
 import org.web.shop_service.openapi.*;
-import org.web.shop_service.product.ProductDTO;
 import org.web.shop_service.user.AuthUser;
 
 @RequiredArgsConstructor
@@ -53,8 +52,8 @@ public class OrderController {
                            @AuthenticationPrincipal
                            AuthUser user) {
         return idempotenceKeyService.process(idempotencyKey,
-                () -> orderService.create(request, user),
-                OrderDTO.class);
+                "order:create",
+                () -> orderService.create(request, user));
     }
 
     @PutMapping("/{id}/status")
