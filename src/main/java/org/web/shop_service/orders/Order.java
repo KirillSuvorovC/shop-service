@@ -14,13 +14,15 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "orders")
+@Table(name = Order.TABLE_NAME)
 @NamedEntityGraph(
         name = Order.GRAPH_WITH_ITEMS_WITHOUT_PRODUCT,
         attributeNodes = @NamedAttributeNode("items")
 )
 public class Order {
     public static final String GRAPH_WITH_ITEMS_WITHOUT_PRODUCT = "ITEMS_WITHOUT_PRODUCT";
+    public static final String TABLE_NAME = "orders";
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

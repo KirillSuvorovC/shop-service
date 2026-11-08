@@ -13,13 +13,13 @@ import org.web.shop_service.utils.JwtUtils;
 
 @RestController
 @RequiredArgsConstructor
-@Profile("dev")
+@Profile({"dev", "test"})
 @RequestMapping("/dev/api/auth")
 @Tag(name = "Dev Auth",
         description = """
         Используется для быстрой проверки прав
         на эндпоинтах. Данный эндпоинт доступен
-        только для разработки
+        только для разработки/тестов
         """)
 public class DevAuthController {
     private final UserService service;

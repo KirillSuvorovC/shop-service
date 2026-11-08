@@ -11,15 +11,17 @@ import java.util.List;
 @Schema(description = "Заказ")
 public class OrderDTO extends VersionedResponse {
     @Schema(description = "ID заказа", example = "1")
-    private final Long id;
+    private Long id;
     @Schema(description = "Статус заказа", example = "NEW")
-    private final OrderStatus status;
+    private OrderStatus status;
     @Schema(description = "Список позиций заказа")
-    private final List<OrderItemDTO> items;
+    private List<OrderItemDTO> items;
     @Schema(description = "Количество позиций заказа", example = "1")
-    private final int count;
+    private int count;
     @Schema(description = "Дата создания заказа")
-    private final ZonedDateTime createdAt;
+    private ZonedDateTime createdAt;
+
+    public OrderDTO() {}
 
     public OrderDTO(Order order) {
         this.id = order.getId();
