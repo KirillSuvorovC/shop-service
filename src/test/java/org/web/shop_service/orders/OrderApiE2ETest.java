@@ -1,10 +1,12 @@
 package org.web.shop_service.orders;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.http.HttpStatus;
+import org.web.shop_service.TestTags;
 import org.web.shop_service.auth.CookieHelper;
 import org.web.shop_service.openapi.CustomHTTPHeaders;
 import org.web.shop_service.product.ProductCreateRequest;
@@ -17,6 +19,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+@Tag(TestTags.SMOKE)
 public class OrderApiE2ETest extends IntegrationTest {
     private static final String IDEMPOTENCY_ERROR = """
                                 \n

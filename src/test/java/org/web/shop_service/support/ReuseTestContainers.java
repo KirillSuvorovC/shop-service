@@ -37,6 +37,5 @@ public class ReuseTestContainers {
         final String statement = jdbcTemplate.queryForObject(SQL_CLEAN_TABLES, String.class);
         Objects.requireNonNull(statement);
         jdbcTemplate.execute(statement);
-        System.out.println("Completed query:" + statement);
     }
 }
