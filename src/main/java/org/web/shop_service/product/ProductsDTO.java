@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
 @Getter
 @Schema(description = "Список продуктов")
 public class ProductsDTO {
-    private final List<ProductDTO> products;
+    private List<ProductDTO> products;
     @Schema(description = "Количество", example = "1")
-    private final int count;
+    private int count;
+
+    public ProductsDTO() {}
 
     public ProductsDTO(List<Product> products) {
         this.products = products.stream()

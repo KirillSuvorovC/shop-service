@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.web.shop_service.support.ReuseTestContainers;
 import org.web.shop_service.support.TestContainersFactory;
 
 import java.util.UUID;
@@ -19,11 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Transactional
 @Testcontainers
-class PublishBoxRepositoryTest {
+class PublishBoxRepositoryTest extends ReuseTestContainers {
     private static final String SQL_FILE = "test_data/insert_values.sql";
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = TestContainersFactory.postgreSQLContainer();
 
     @Autowired
     private PublishBoxRepository repository;

@@ -14,6 +14,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.web.shop_service.support.ProfileTest;
+import org.web.shop_service.support.ReuseTestContainers;
 import org.web.shop_service.support.TestContainersFactory;
 import org.web.shop_service.support.configs.EnableTestRabbitTemplate;
 import org.web.shop_service.support.configs.TestRabbitMQConfig;
@@ -37,10 +38,7 @@ import static org.mockito.Mockito.doThrow;
 @Testcontainers
 @EnableTestRabbitTemplate
 @Sql("/org/web/shop_service/product/insert_values.sql")
-class PriceHistoryListenerIntegrationTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = TestContainersFactory.postgreSQLContainer();
+class PriceHistoryListenerIntegrationTest extends ReuseTestContainers {
 
     @Autowired
     private TestRabbitTemplate template;

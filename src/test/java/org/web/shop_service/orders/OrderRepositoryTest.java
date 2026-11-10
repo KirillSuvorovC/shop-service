@@ -12,6 +12,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.web.shop_service.support.ReuseTestContainers;
 import org.web.shop_service.support.TestContainersFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,11 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest(properties =
         "spring.jpa.properties.hibernate.generate_statistics=true")
 @Sql(OrderRepositoryTest.SQL_FILE)
-class OrderRepositoryTest {
+class OrderRepositoryTest extends ReuseTestContainers {
     static final String SQL_FILE = "insert_values.sql";
-    @Container
-    @ServiceConnection
-    private static final PostgreSQLContainer<?> postgres = TestContainersFactory.postgreSQLContainer();
 
     @Autowired
     private OrderRepository orderRepository;

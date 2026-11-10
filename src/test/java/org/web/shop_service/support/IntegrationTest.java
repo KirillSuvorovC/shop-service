@@ -3,17 +3,23 @@ package org.web.shop_service.support;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.web.shop_service.auth.CookieHelper;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -22,16 +28,10 @@ import java.util.function.Supplier;
 import static io.restassured.RestAssured.given;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = "spring.flyway.cleanDisabled=false")
 @ProfileTest
 @Testcontainers
-public class E2ETest {
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer<?> postgres = TestContainersFactory.postgreSQLContainer();
-    @Container
-    @ServiceConnection
-    static final RabbitMQContainer rabbitmq = TestContainersFactory.rabbitMQContainer();
-
+public class IntegrationTest extends ReuseTestContainers {
     @LocalServerPort
     private int port;
 

@@ -15,17 +15,13 @@ import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.web.shop_service.support.ProfileTest;
-import org.web.shop_service.support.TestContainersFactory;
 import org.web.shop_service.outbox.publishbox.PublishBoxService;
+import org.web.shop_service.support.ProfileTest;
+import org.web.shop_service.support.ReuseTestContainers;
 
 import java.time.Duration;
 import java.util.function.Supplier;
@@ -37,7 +33,7 @@ import static org.awaitility.Awaitility.await;
 @ProfileTest
 @Import(OutboxE2ETest.TestPublishBoxListener.class)
 @Testcontainers
-class OutboxE2ETest {
+class OutboxE2ETest extends ReuseTestContainers {
 
     public static final String TEST_LISTENER_ID = "testListener";
 
@@ -55,14 +51,6 @@ class OutboxE2ETest {
             publishBoxService.publishEvent(event, CONSUMER);
         }
     }
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = TestContainersFactory.postgreSQLContainer();
-    @Container
-    @ServiceConnection
-    static RabbitMQContainer rabbitmq = TestContainersFactory.rabbitMQContainer();
-
     /**
      * Устанавливаем маленькую задержку интервала отправки событий
      * сервисом {@link OutboxProcessor} для ускорения теста
@@ -133,6 +121,5 @@ class OutboxE2ETest {
                                             event.getEventId(), CONSUMER);
                     assertThat(exists).isTrue();
                 });
-
     }
 }

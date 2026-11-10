@@ -10,17 +10,14 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.web.shop_service.support.ReuseTestContainers;
 import org.web.shop_service.support.TestContainersFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.jpa.properties.hibernate.generate_statistics=true")
 @Testcontainers
-public class UserRepositoryTest {
-    @ServiceConnection
-    @Container
-    static final PostgreSQLContainer<?> postgres = TestContainersFactory.postgreSQLContainer();
-
+public class UserRepositoryTest extends ReuseTestContainers {
     @Autowired
     private UserRepository repository;
 

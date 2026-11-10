@@ -9,7 +9,7 @@ import org.web.shop_service.auth.CookieHelper;
 import org.web.shop_service.openapi.CustomHTTPHeaders;
 import org.web.shop_service.product.ProductCreateRequest;
 import org.web.shop_service.product.ProductDTO;
-import org.web.shop_service.support.E2ETest;
+import org.web.shop_service.support.IntegrationTest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-public class OrderE2ETest extends E2ETest {
+public class OrderApiE2ETest extends IntegrationTest {
     private static final String IDEMPOTENCY_ERROR = """
                                 \n
                                 POST-запрос неидемпотентный. Ожидалось,

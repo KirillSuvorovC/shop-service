@@ -11,6 +11,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.web.shop_service.support.ProfileTest;
+import org.web.shop_service.support.ReuseTestContainers;
 import org.web.shop_service.support.TestContainersFactory;
 import org.web.shop_service.support.configs.TestRabbitMQConfig;
 import org.web.shop_service.utils.JsonUtils;
@@ -22,14 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 @Import(TestRabbitMQConfig.class)
 @Testcontainers
-class OutboxServiceImplIntegrationTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = TestContainersFactory.postgreSQLContainer();
-
+class OutboxServiceImplIntegrationTest extends ReuseTestContainers {
     @Autowired
     private OutboxService service;
-
     @Autowired
     private OutBoxRepository repository;
 
