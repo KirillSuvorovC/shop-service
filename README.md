@@ -9,7 +9,7 @@ REST API интернет-магазина с JWT-аутентификацией
 * PostgreSQL, Flyway, Caffeine (local cache)
 * RabbitMQ (Transactional Outbox)
 * Docker, docker-compose
-* Testcontainers, JUnit 5, Mockito
+* Testcontainers, JUnit 5, RestAssured, Mockito
 
 ## Возможности
 * Регистрация и аутентификация через JWT
@@ -24,7 +24,10 @@ REST API интернет-магазина с JWT-аутентификацией
 * **Transaction Outbox** - гарантия доставки событий
 * **Идемпотентный потребитель** - защита от дублей при повторной доставке
 * **Идемпотентные POST-запросы** - защита от дублей через Idempotency-Key
-(Caffeine + CompletableFuture); операция выполняется не более одного раза.
+(Caffeine + CompletableFuture); операция выполняется не более одного раза
+* **Переиспользование Testcontainers** - за счет этого время на прогон
+всех тестов уменьшилось на 60-70%. Данные в тестовой БД очищаются между
+тестами
 * **Кэширование (Caffeine)** - для эндпоинтов 'GET /api/products/{id}',
 'GET /api/orders/{id}'; списки с пагинацией не кэшируются из-за сложной инвалидации
 * **Оптимистичная блокировка** (`If-Match`) - безопасный конкурентный доступ
@@ -39,21 +42,29 @@ REST API интернет-магазина с JWT-аутентификацией
 git clone https://github.com/KirillSuvorovC/shop-service.git
 cd shop-service
 ```
-2. Скопируйте `.env.example` в `.env` и заполните значения.
+2. Скопируйте шаблон `.env.example` в новый файл `.env` и заполните значения.
 3. Запустите:
 ```bash
 docker compose up
 ```
-4. API: http://localhost:8080
-   Swagger: http://localhost:8080/swagger-ui.html
+4. API: http://localhost:8080\
+   Swagger: http://localhost:8080/swagger-ui.html (недоступен для профиля prod)
 5. Для остановки:
 ```bash
 docker compose down
 ```
 
 ## Тесты
-177 тестов (unit · slice · integration · E2E), ~3-6 мин.
-* Запустить тесты:
-```bash
-./mvnw test
+Всего 180 тестов, в них входят юнит, срезовые, интеграционные и сквозные (E2E) тесты.
+Прогон всех тестов длится примерно 1-1.5 мин. Критичные сценарии вынесены в smoke-тесты
+(тег smoke).\
+Как запустить тесты:
+1. Запустить Docker
+2. Ввести команду для запуска всех тестов:
+```shell
+.\mvnw test
+```
+3. Команда для запуска только smoke-тестов:
+```shell
+.\mvnw test -Dgroups=smoke
 ```
