@@ -47,7 +47,7 @@ cd shop-service
 ```bash
 docker compose up
 ```
-4. API: http://localhost:8080\
+4. API: http://localhost:8080 \
    Swagger: http://localhost:8080/swagger-ui.html (недоступен для профиля prod)
 5. Для остановки:
 ```bash
