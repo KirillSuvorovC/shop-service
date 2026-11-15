@@ -1,0 +1,23 @@
+on: ["push", "pull_request"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Клонирование репозитория
+        uses: actions/checkout@v4
+
+      - name: Установка Java 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Установка Maven
+        uses: stCarolas/setup-maven@v4
+        with:
+          maven-version: 3.9.16
+
+      - name: Запуск тестов
+        run: mvn test
