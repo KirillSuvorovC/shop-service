@@ -14,10 +14,5 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
-      - name: Установка Maven
-        uses: stCarolas/setup-maven@v4
-        with:
-          maven-version: 3.9.16
-
       - name: Запуск тестов
         run: mvn test
